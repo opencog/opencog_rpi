@@ -1,0 +1,40 @@
+libpersist-odbc.so
+	libpthread.so.0
+	libodbc.so.2
+	libstdc++.so.6
+	libm.so.6
+	libgomp.so.1
+	libgcc_s.so.1
+	libc.so.6
+	ld-linux-armhf.so.3
+libpthread.so.0
+	libc.so.6
+	ld-linux-armhf.so.3
+libodbc.so.2
+	libltdl.so.7
+	libdl.so.2
+	libpthread.so.0
+	libc.so.6
+	ld-linux-armhf.so.3
+libstdc++.so.6
+	libm.so.6
+	libc.so.6
+	ld-linux-armhf.so.3
+	libgcc_s.so.1
+libm.so.6
+	libc.so.6
+libgomp.so.1
+	libpthread.so.0
+	libc.so.6
+libgcc_s.so.1
+	libc.so.6
+libc.so.6
+	ld-linux-armhf.so.3
+ld-linux-armhf.so.3
+libltdl.so.7
+	libdl.so.2
+	libc.so.6
+	ld-linux-armhf.so.3
+libdl.so.2
+	libc.so.6
+	ld-linux-armhf.so.3

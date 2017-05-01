@@ -1,0 +1,61 @@
+libpersist-pg.so
+	libpthread.so.0
+	libpq.so.5
+	libstdc++.so.6
+	libm.so.6
+	libgomp.so.1
+	libgcc_s.so.1
+	libc.so.6
+libpthread.so.0
+	libc.so.6
+	ld-linux-armhf.so.3
+libpq.so.5
+	libssl.so.1.0.0
+	libcrypto.so.1.0.0
+	libgssapi_krb5.so.2
+	libldap_r-2.4.so.2
+	libpthread.so.0
+	libc.so.6
+	ld-linux-armhf.so.3
+libstdc++.so.6
+	libm.so.6
+	libc.so.6
+	ld-linux-armhf.so.3
+	libgcc_s.so.1
+libm.so.6
+	libc.so.6
+libgomp.so.1
+	libpthread.so.0
+	libc.so.6
+libgcc_s.so.1
+	libc.so.6
+libc.so.6
+	ld-linux-armhf.so.3
+ld-linux-armhf.so.3
+libssl.so.1.0.0
+	libcrypto.so.1.0.0
+	libdl.so.2
+	libc.so.6
+	ld-linux-armhf.so.3
+libcrypto.so.1.0.0
+	libdl.so.2
+	libc.so.6
+	ld-linux-armhf.so.3
+libgssapi_krb5.so.2
+	libkrb5.so.3
+	libk5crypto.so.3
+	libcom_err.so.2
+	libkrb5support.so.0
+	libdl.so.2
+	libkeyutils.so.1
+	libresolv.so.2
+	libc.so.6
+	ld-linux-armhf.so.3
+libldap_r-2.4.so.2
+	liblber-2.4.so.2
+	libresolv.so.2
+	libsasl2.so.2
+	libgnutls-deb0.so.28
+	libpthread.so.0
+	libc.so.6
+	ld-linux-armhf.so.3
