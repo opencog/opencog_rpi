@@ -1,1 +1,0 @@
-/home/dagiopia/rasp_root/usr/share/pyshared/cairo/__init__.py

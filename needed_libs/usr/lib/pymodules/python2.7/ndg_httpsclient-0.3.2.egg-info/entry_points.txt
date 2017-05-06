@@ -1,1 +1,1 @@
-/home/dagiopia/rasp_root/usr/share/pyshared/ndg_httpsclient-0.3.2.egg-info/entry_points.txt
+../../../../../../needed_libs/usr/share/pyshared/ndg_httpsclient-0.3.2.egg-info/entry_points.txt
