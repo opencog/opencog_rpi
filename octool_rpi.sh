@@ -1,6 +1,7 @@
 #/bin/bash
 #
 ## @file        octool_rpi
+## @author      Dagim Sisay <dagiopia@gmail.com>
 
 
 #Octool for Raspbian OS
@@ -79,13 +80,16 @@ usage() {
 
 
 download_install_oc () {
-
+	wget 144.76.153.5/opencog/opencog_rpi.deb
+	sudo dpkg -i opencog_rpi.deb
+	rm opencog_rpi.deb
 }
 
 setup_sys_for_cc () {
     #downloading cogutils, atomspace and opencog source code
     mkdir -p /home/$USER/$CC_TC_DIR/opencog
     cd /home/$USER/$CC_TC_DIR/opencog
+    rm -rf  *
     wget https://github.com/opencog/cogutils/archive/master.tar.gz
     tar -xvf master.tar.gz
     rm master.tar.gz
@@ -105,7 +109,32 @@ setup_sys_for_cc () {
 }
 
 do_cc_for_rpi () {
+    export PATH=$PATH:/home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/tools-master/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
+    #compiling cogutils
+    cd /home/$USER/$CC_TC_DIR/opencog/cogutils/build_hf
+    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
+    make $(nproc)
+    make install 
 
+    #compiling atomspace
+    cd /home/$USER/$CC_TC_DIR/opencog/atomspace/build_hf
+    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
+    make $(nproc)
+    make install
+
+    #compiling opencog
+    cd /home/$USER/$CC_TC_DIR/opencog/opencog/build_hf
+    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
+    make $(nproc)
+    make install
+    
+    #correct RPATHS
+    cd /home/$USER/$TC_CC_DIR/
+    wget https://raw.githubusercontent.com/Dagiopia/my_helpers/master/batch_chrpath/batch_chrpath.py
+    python batch_chrpath.py /home/$USER/$TC_CC_DIR/opencog_rasp/usr/local /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/needed_libs /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/opencog_rasp
+    rm batch_chrpath.py
+
+    #package into deb
 }
 
 
@@ -153,11 +182,13 @@ fi
 
 if [ $INSTALL_OC ] ; then 
 	echo "Get Compiled files from somewhere"
+        download_install_oc
 fi
 
 if [ $INSTALL_TC ] ; then 
 	echo "Downloading Necessary CC Packages"
 	#make the appropriate directories and git clone the toolchain
+	setup_sys_for_cc
 fi
 
 if [ $CC_OPENCOG ] ; then
@@ -166,17 +197,9 @@ if [ $CC_OPENCOG ] ; then
 	if [ $(uname -m) == "x86_64" ] ; then
 		printf "${GOOD_COLOR}okay it's an x86_64 PC... Installing CC packages${NORMAL_COLOR}\n"
 		PROCEED_CC=true
+	        sudo apt-get install -y $APT_ARGS $INSTALL_CC_PACKAGES
+		do_cc_for_rpi
 	else
 		printf "${BAD_COLOR}Your Machine is ARM! Let's Cross Compile on a bigger machine.${NORMAL_COLOR}"
-	fi
-
-	if [ $PROCEED_CC ] ; then
-	        #sudo apt-get install -y $APT_ARGS $INSTALL_CC_PACKAGES
-		if [ -d "/home/$USER/$CC_TC_DIR" ] ; then
-			echo "Directory Does exist!"
-
-		else 
-			echo "Directory Doesn't exist!"
-		fi
 	fi
 fi
