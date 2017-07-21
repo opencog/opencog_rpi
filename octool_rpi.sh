@@ -135,6 +135,39 @@ do_cc_for_rpi () {
     rm batch_chrpath.py
 
     #package into deb
+    cd /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/
+    find -P . -type l -name "*boost*" -exec rm {} \;
+    mkdir ./usr/local/lib/pkgconfig DEBIAN
+    echo '''Package: opencog-dev
+    Priority: optional
+    Section: universe/opencog
+    Maintainer: Dagim Sisay <dagim@icog-labs.com>
+    Architecture: armhf
+    Version: 1.0-1
+    Homepage: wiki.opencog.org
+    Description: Artificial General Inteligence Engine for Linux
+     Opencog is a gigantic software that is being built with the ambition
+     to one day create human like intelligence that can be concious and 
+     emotional. 
+     This is hopefully the end task-specific narrow AI. 
+     This package includes the files necessary for running opencog on RPI3.''' > control
+     echo '''#Manually written pkgconfig file for opencog - START
+     prefix=/usr/local
+     exec_prefix=${prefix}
+     libdir=${exec_prefix}/lib
+     includedir=${prefix}/include
+     Name: opencog
+     Description: Artificial General Intelligence Software
+     Version: 1.0
+     Cflags: -I${includedir}
+     Libs: -L${libdir}
+     #Manually written pkgconfig file for opencog - END''' > ./usr/local/lib/pkgconfig/opencog.pc
+     cd ..
+     cp -r opencog_rasp opencog-dev_1.0-1_armhf
+     sudo chown -R root:staff opencog-dev_1.0-1_armhf
+     sudo dpkg-deb --build opencog-dev_1.0-1_armhf
+     
+
 }
 
 
@@ -168,15 +201,14 @@ fi
 if [ $INSTALL_DEPS ] ; then 
 	echo "Install Deps"
 
+	#only allow installation for arm device (RPI)
 	if [ $(uname -m) == "armv7l" ] ; then
 		printf "${GOOD_COLOR}okay it's an ARM... Installing packages${NORMAL_COLOR}\n"
-		#only allow installation for arm device (RPI)
 	        sudo apt-get install -y $APT_ARGS $INSTALL_PACKAGES
-
+		#TODO download and compile TBB
 	else
 		printf "${BAD_COLOR}Your Machine is Not ARM! The dependancy installation is for RPI only.${NORMAL_COLOR}"
 	fi
-	#download and compile TBB
 
 fi
 
