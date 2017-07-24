@@ -214,9 +214,9 @@ if [ $INSTALL_DEPS ] ; then
 		printf "${GOOD_COLOR}okay it's an ARM... Installing packages${NORMAL_COLOR}\n"
 	        sudo apt-get install -y $APT_ARGS $INSTALL_PACKAGES
 		#TODO download and compile TBB
-		cd /home/$USER/$TC_CC_DIR
-		mkdir temp 
-		cd temp
+		cd /home/$USER/
+		mkdir -p tbb_temp 
+		cd tbb_temp
 		wget https://github.com/01org/tbb/archive/$TBB_V.tar.gz
 		tar -xf $TBB_V.tar.gz
 		cd tbb-$TBB_V
@@ -225,8 +225,8 @@ if [ $INSTALL_DEPS ] ; then
 		sudo cp build/linux_armv7*_release/libtbb.so.2 /usr/local/lib/
 		cd /usr/local/lib
 		sudo ln -s libtbb.so.2 libtbb.so
-		cd /home/$USER/$TC_CC_DIR 
-		rm -r temp 
+		cd /home/$USER 
+		rm -r tbb_temp 
 
 	else
 		printf "${BAD_COLOR}Your Machine is Not ARM! The dependancy installation is for RPI only.${NORMAL_COLOR}\n"
