@@ -58,13 +58,14 @@ INSTALL_PACKAGES="
 	krb5-multidev "
 
 
-INSTALL_CC_PACKAGES=" chrpath "
+INSTALL_CC_PACKAGES=" python chrpath "
 
 
 SELF_NAME=$(basename $0)
 TOOL_NAME=octool_rpi
 
 CC_TC_DIR="RPI_OC_TC" #RPI Opencog Toolchain Container
+export TBB_V="2017_U7" # https://github.com/01org/tbb/archive/2017_U7.tar.gz
 
 usage() {
   echo "Usage: $SELF_NAME OPTION"
@@ -85,6 +86,7 @@ download_install_oc () {
 	rm opencog_rpi.deb
 }
 
+
 setup_sys_for_cc () {
     #downloading cogutils, atomspace and opencog source code
     mkdir -p /home/$USER/$CC_TC_DIR/opencog
@@ -99,8 +101,8 @@ setup_sys_for_cc () {
     wget https://github.com/opencog/opencog/archive/master.tar.gz
     tar -xvf master.tar.gz
     rm master.tar.gz
+    for d in * ; do echo $d ; mkdir $d/build_hf ; done
     wget https://raw.githubusercontent.com/Dagiopia/cogutils/rpi/arm_gnueabihf_toolchain.cmake
-    for d in * ; do mkdir $i/build_hf ; done
     cd /home/$USER/$CC_TC_DIR
     #downloading compiler and libraries
     wget 144.76.153.5/opencog/opencog_rpi_toolchain.tar.gz 
@@ -108,35 +110,41 @@ setup_sys_for_cc () {
     rm opencog_rpi_toolchain.tar.gz
 }
 
+
 do_cc_for_rpi () {
+    if [ -d /home/$USER/$CC_TC_DIR -a -d /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain -a -d /home/$USER/$CC_TC_DIR/opencog ] ; then
+		printf "${BAD_COLOR}You do not seem to have the compiler toolchain. Downloading now.${NORMAL_COLOR}\n"
+		sleep 2
+    fi
+    	
     export PATH=$PATH:/home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/tools-master/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
     #compiling cogutils
-    cd /home/$USER/$CC_TC_DIR/opencog/cogutils/build_hf
+    cd /home/$USER/$CC_TC_DIR/opencog/cogutils-master/build_hf
     cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
-    make $(nproc)
+    make -j$(nproc)
     make install 
 
     #compiling atomspace
-    cd /home/$USER/$CC_TC_DIR/opencog/atomspace/build_hf
+    cd /home/$USER/$CC_TC_DIR/opencog/atomspace-master/build_hf
     cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
-    make $(nproc)
+    make -j$(nproc)
     make install
 
     #compiling opencog
-    cd /home/$USER/$CC_TC_DIR/opencog/opencog/build_hf
+    cd /home/$USER/$CC_TC_DIR/opencog/opencog-master/build_hf
     cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
-    make $(nproc)
+    make -j$(nproc)
     make install
     
     #correct RPATHS
     cd /home/$USER/$TC_CC_DIR/
     wget https://raw.githubusercontent.com/Dagiopia/my_helpers/master/batch_chrpath/batch_chrpath.py
-    python batch_chrpath.py /home/$USER/$TC_CC_DIR/opencog_rasp/usr/local /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/needed_libs /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/opencog_rasp
+    python batch_chrpath.py /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/opencog_rasp/usr/local /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/needed_libs /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/opencog_rasp
     rm batch_chrpath.py
 
     #package into deb
     cd /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/
-    find -P . -type l -name "*boost*" -exec rm {} \;
+    find -P /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/ -type l -name "*boost*" -exec rm {} \;
     mkdir ./usr/local/lib/pkgconfig DEBIAN
     echo '''Package: opencog-dev
     Priority: optional
@@ -206,8 +214,22 @@ if [ $INSTALL_DEPS ] ; then
 		printf "${GOOD_COLOR}okay it's an ARM... Installing packages${NORMAL_COLOR}\n"
 	        sudo apt-get install -y $APT_ARGS $INSTALL_PACKAGES
 		#TODO download and compile TBB
+		cd /home/$USER/$TC_CC_DIR
+		mkdir temp 
+		cd temp
+		wget https://github.com/01org/tbb/archive/$TBB_V.tar.gz
+		tar -xf $TBB_V.tar.gz
+		cd tbb-$TBB_V
+		make tbb CXXFLAGS+="-DTBB_USE_GCC_BUILTINS=1 -D__TBB_64BIT_ATOMICS=0"
+		sudo cp -r include/serial include/tbb /usr/local/include
+		sudo cp build/linux_armv7*_release/libtbb.so.2 /usr/local/lib/
+		cd /usr/local/lib
+		sudo ln -s libtbb.so.2 libtbb.so
+		cd /home/$USER/$TC_CC_DIR 
+		rm -r temp 
+
 	else
-		printf "${BAD_COLOR}Your Machine is Not ARM! The dependancy installation is for RPI only.${NORMAL_COLOR}"
+		printf "${BAD_COLOR}Your Machine is Not ARM! The dependancy installation is for RPI only.${NORMAL_COLOR}\n"
 	fi
 
 fi
