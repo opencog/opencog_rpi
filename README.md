@@ -4,7 +4,7 @@ Opencog Cross Compile Toolchain for Raspberry Pi3
 This repo contains the compiler, needed libraries and script to
 cross compile and install opencog on a RPI3 board. 
 
-#Usage
+# Usage
 
 The octool_rpi.sh script handles most of the work for both 
 cross compiling on a fancy machine and installing on a RPI 
@@ -32,10 +32,10 @@ To install opencog with a debian package of pre-compiled
 binaries use the ```-o``` switch. This downloads a .deb
 package and installs it on the system. 
 It assumes that you have the base dependancies installed 
-so it's best to run :
+so it's best to run the following to first install the 
+dependancies and then opencog. 
 ```
     ./octool_rpi.sh -do
 ```
-This installs the dependancies and then opencog. 
 
 
