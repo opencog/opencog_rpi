@@ -105,9 +105,10 @@ setup_sys_for_cc () {
     wget https://raw.githubusercontent.com/Dagiopia/cogutils/rpi/arm_gnueabihf_toolchain.cmake
     cd /home/$USER/$CC_TC_DIR
     #downloading compiler and libraries
-    wget 144.76.153.5/opencog/opencog_rpi_toolchain.tar.gz 
-    tar -xvf opencog_rpi_toolchain.tar.gz
-    rm opencog_rpi_toolchain.tar.gz
+    wget https://github.com/Dagiopia/opencog_rpi/archive/master.zip 
+    unzip master.zip
+    mv opencog_rpi-master opencog_rpi_toolchain
+    rm master.zip
 }
 
 
