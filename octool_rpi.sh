@@ -119,7 +119,6 @@ do_cc_for_rpi () {
     else
 		
 		printf "${BAD_COLOR}You do not seem to have the compiler toolchain.\nPlease run:\n\t\t$SELF_NAME -tc \n${NORMAL_COLOR}\n"
-		sleep 2
 		exit
     fi
     	
