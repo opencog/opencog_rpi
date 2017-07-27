@@ -102,20 +102,25 @@ setup_sys_for_cc () {
     tar -xvf master.tar.gz
     rm master.tar.gz
     for d in * ; do echo $d ; mkdir $d/build_hf ; done
-    wget https://raw.githubusercontent.com/Dagiopia/cogutils/rpi/arm_gnueabihf_toolchain.cmake
-    cd /home/$USER/$CC_TC_DIR
+    #wget https://raw.githubusercontent.com/Dagiopia/cogutils/rpi/arm_gnueabihf_toolchain.cmake
+    cd /home/$USER/$CC_TC_DIR 
     #downloading compiler and libraries
     wget https://github.com/Dagiopia/opencog_rpi/archive/master.zip 
     unzip master.zip
     mv opencog_rpi-master opencog_rpi_toolchain
+    mv /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/arm_gnueabihf_toolchain.cmake /home/$USER/$CC_TC_DIR/opencog
     rm master.zip
 }
 
 
 do_cc_for_rpi () {
     if [ -d /home/$USER/$CC_TC_DIR -a -d /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain -a -d /home/$USER/$CC_TC_DIR/opencog ] ; then
-		printf "${BAD_COLOR}You do not seem to have the compiler toolchain. Downloading now.${NORMAL_COLOR}\n"
+		printf "${GOOD_COLOR}Everything seems to be in order.${NORMAL_COLOR}\n"
+    else
+		
+		printf "${BAD_COLOR}You do not seem to have the compiler toolchain.\nPlease run:\n\t\t$SELF_NAME -tc \n${NORMAL_COLOR}\n"
 		sleep 2
+		exit
     fi
     	
     export PATH=$PATH:/home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/tools-master/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
