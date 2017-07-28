@@ -65,6 +65,7 @@ SELF_NAME=$(basename $0)
 TOOL_NAME=octool_rpi
 
 CC_TC_DIR="RPI_OC_TC" #RPI Opencog Toolchain Container
+DEB_PKG_NAME="opencog-dev_1.0-1_armhf"
 export TBB_V="2017_U7" # https://github.com/01org/tbb/archive/2017_U7.tar.gz
 
 usage() {
@@ -89,6 +90,9 @@ download_install_oc () {
 
 setup_sys_for_cc () {
     #downloading cogutils, atomspace and opencog source code
+    if [ -d /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/$DEB_PKG_NAME ] ; then
+	sudo rm -rf /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/$DEB_PKG_NAME
+    fi
     if [ -d /home/$USER/$CC_TC_DIR ] ; then
     	rm -rf /home/$USER/$CC_TC_DIR/*
     fi
@@ -154,10 +158,12 @@ do_cc_for_rpi () {
     rm batch_chrpath.py
 
     #package into deb
-    cd /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/
-    find -P /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/ -type l -name "*boost*" -exec rm {} \;
+    cd /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/
+    cp -r opencog_rasp $DEB_PKG_NAME
+    cd /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/$DEB_PKG_NAME
+    find -P /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/$DEB_PKG_NAME -type l -name "*boost*" -exec rm {} \;
     mkdir ./usr/local/lib/pkgconfig DEBIAN
-    echo '''Package: opencog-dev
+    echo -ne '''Package: opencog-dev
     Priority: optional
     Section: universe/opencog
     Maintainer: Dagim Sisay <dagim@icog-labs.com>
@@ -169,8 +175,8 @@ do_cc_for_rpi () {
      to one day create human like intelligence that can be concious and 
      emotional. 
      This is hopefully the end task-specific narrow AI. 
-     This package includes the files necessary for running opencog on RPI3.''' > DEBIAN/control
-     echo '''#Manually written pkgconfig file for opencog - START
+     This package includes the files necessary for running opencog on RPI3.\n''' > DEBIAN/control
+     echo -ne '''#Manually written pkgconfig file for opencog - START
      prefix=/usr/local
      exec_prefix=${prefix}
      libdir=${exec_prefix}/lib
@@ -180,11 +186,10 @@ do_cc_for_rpi () {
      Version: 1.0
      Cflags: -I${includedir}
      Libs: -L${libdir}
-     #Manually written pkgconfig file for opencog - END''' > ./usr/local/lib/pkgconfig/opencog.pc
+     #Manually written pkgconfig file for opencog - END\n''' > ./usr/local/lib/pkgconfig/opencog.pc
      cd ..
-     cp -r opencog_rasp opencog-dev_1.0-1_armhf
-     sudo chown -R root:staff opencog-dev_1.0-1_armhf
-     sudo dpkg-deb --build opencog-dev_1.0-1_armhf
+     sudo chown -R root:staff $DEB_PKG_NAME
+     sudo dpkg-deb --build $DEB_PKG_NAME
      
 
 }
