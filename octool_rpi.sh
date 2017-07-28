@@ -163,30 +163,31 @@ do_cc_for_rpi () {
     cd /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/$DEB_PKG_NAME
     find -P /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/$DEB_PKG_NAME -type l -name "*boost*" -exec rm {} \;
     mkdir ./usr/local/lib/pkgconfig DEBIAN
-    echo -ne '''Package: opencog-dev
-    Priority: optional
-    Section: universe/opencog
-    Maintainer: Dagim Sisay <dagim@icog-labs.com>
-    Architecture: armhf
-    Version: 1.0-1
-    Homepage: wiki.opencog.org
-    Description: Artificial General Inteligence Engine for Linux
-     Opencog is a gigantic software that is being built with the ambition
-     to one day create human like intelligence that can be concious and 
-     emotional. 
-     This is hopefully the end task-specific narrow AI. 
-     This package includes the files necessary for running opencog on RPI3.\n''' > DEBIAN/control
-     echo -ne '''#Manually written pkgconfig file for opencog - START
-     prefix=/usr/local
-     exec_prefix=${prefix}
-     libdir=${exec_prefix}/lib
-     includedir=${prefix}/include
-     Name: opencog
-     Description: Artificial General Intelligence Software
-     Version: 1.0
-     Cflags: -I${includedir}
-     Libs: -L${libdir}
-     #Manually written pkgconfig file for opencog - END\n''' > ./usr/local/lib/pkgconfig/opencog.pc
+    echo '''Package: opencog-dev
+Priority: optional
+Section: universe/opencog
+Maintainer: Dagim Sisay <dagim@icog-labs.com>
+Architecture: armhf
+Version: 1.0-1
+Homepage: wiki.opencog.org
+Description: Artificial General Inteligence Engine for Linux
+  Opencog is a gigantic software that is being built with the ambition
+  to one day create human like intelligence that can be conscious and
+  emotional.
+  This is hopefully the end of task-specific narrow AI.
+  This package includes the files necessary for running opencog on RPI3.''' > DEBIAN/control
+     
+     echo '''#Manually written pkgconfig file for opencog - START
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+Name: opencog
+Description: Artificial General Intelligence Software
+Version: 1.0
+Cflags: -I${includedir}
+Libs: -L${libdir}
+#Manually written pkgconfig file for opencog - END''' > ./usr/local/lib/pkgconfig/opencog.pc
      cd ..
      sudo chown -R root:staff $DEB_PKG_NAME
      sudo dpkg-deb --build $DEB_PKG_NAME
