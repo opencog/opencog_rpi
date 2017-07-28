@@ -125,19 +125,22 @@ do_cc_for_rpi () {
     export PATH=$PATH:/home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/tools-master/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
     #compiling cogutils
     cd /home/$USER/$CC_TC_DIR/opencog/cogutils-master/build_hf
-    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
+    rm -rf /home/$USER/$CC_TC_DIR/opencog/cogutils-master/build_hf/*
+    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
     make -j$(nproc)
     make install 
 
     #compiling atomspace
     cd /home/$USER/$CC_TC_DIR/opencog/atomspace-master/build_hf
-    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
+    rm -rf /home/$USER/$CC_TC_DIR/opencog/atomspace-master/build_hf/*
+    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
     make -j$(nproc)
     make install
 
     #compiling opencog
     cd /home/$USER/$CC_TC_DIR/opencog/opencog-master/build_hf
-    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
+    rm -rf /home/$USER/$CC_TC_DIR/opencog/opencog-master/build_hf/*
+    cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
     make -j$(nproc)
     make install
     
