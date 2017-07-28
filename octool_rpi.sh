@@ -89,6 +89,9 @@ download_install_oc () {
 
 setup_sys_for_cc () {
     #downloading cogutils, atomspace and opencog source code
+    if [ -d /home/$USER/$CC_TC_DIR ] ; then
+    	rm -rf /home/$USER/$CC_TC_DIR/*
+    fi
     mkdir -p /home/$USER/$CC_TC_DIR/opencog
     cd /home/$USER/$CC_TC_DIR/opencog
     rm -rf  *
@@ -108,7 +111,7 @@ setup_sys_for_cc () {
     wget https://github.com/Dagiopia/opencog_rpi/archive/master.zip 
     unzip master.zip
     mv opencog_rpi-master opencog_rpi_toolchain
-    mv /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/arm_gnueabihf_toolchain.cmake /home/$USER/$CC_TC_DIR/opencog
+    mv opencog_rpi_toolchain/arm_gnueabihf_toolchain.cmake opencog
     rm master.zip
 }
 
@@ -147,7 +150,7 @@ do_cc_for_rpi () {
     #correct RPATHS
     cd /home/$USER/$TC_CC_DIR/
     wget https://raw.githubusercontent.com/Dagiopia/my_helpers/master/batch_chrpath/batch_chrpath.py
-    python batch_chrpath.py /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/opencog_rasp/usr/local /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/needed_libs /home/$USER/$TC_CC_DIR/opencog_rpi_toolchain/opencog_rasp
+    python batch_chrpath.py /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/usr/local /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/needed_libs /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp
     rm batch_chrpath.py
 
     #package into deb
@@ -166,7 +169,7 @@ do_cc_for_rpi () {
      to one day create human like intelligence that can be concious and 
      emotional. 
      This is hopefully the end task-specific narrow AI. 
-     This package includes the files necessary for running opencog on RPI3.''' > control
+     This package includes the files necessary for running opencog on RPI3.''' > DEBIAN/control
      echo '''#Manually written pkgconfig file for opencog - START
      prefix=/usr/local
      exec_prefix=${prefix}
