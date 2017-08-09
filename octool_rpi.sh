@@ -64,9 +64,9 @@ INSTALL_CC_PACKAGES=" python chrpath "
 SELF_NAME=$(basename $0)
 TOOL_NAME=octool_rpi
 
-CC_TC_DIR="RPI_OC_TC" #RPI Opencog Toolchain Container
+export CC_TC_DIR="RPI_OC_TC" #RPI Opencog Toolchain Container
 DEB_PKG_NAME="opencog-dev_1.0-1_armhf"
-export TBB_V="2017_U7" # https://github.com/01org/tbb/archive/2017_U7.tar.gz
+TBB_V="2017_U7" # https://github.com/01org/tbb/archive/2017_U7.tar.gz
 
 usage() {
   echo "Usage: $SELF_NAME OPTION"
