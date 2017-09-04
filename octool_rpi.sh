@@ -84,6 +84,7 @@ usage() {
   echo "  -c   Cross Compile OpenCog (Run on PC!)"
   echo "  -v   Verbose output"
   echo -e "  -h   This help message\n"
+  exit
 }
 
 
@@ -262,6 +263,7 @@ if [ $INSTALL_DEPS ] ; then
 		make -j2
 		sudo make install
 
+		printf "${GOOD_COLOR}Done Installing Dependancies!${NORMAL_COLOR}\n"
 
 	else
 		printf "${BAD_COLOR}Your Machine is Not ARM! The dependancy installation is for RPI only.${NORMAL_COLOR}\n"
