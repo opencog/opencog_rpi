@@ -2,9 +2,9 @@
 #
 ## @file        octool_rpi
 ## @author      Dagim Sisay <dagiopia@gmail.com>
+## @licence     AGPL
 
-
-#Octool for Raspbian OS
+#Octool for Raspbian
 
 #CONSTANTS
 
@@ -17,6 +17,10 @@ NORMAL_COLOR='\033[0m'
 
 INSTALL_PACKAGES="
 	build-essential \
+	automake \
+	autoconf-archive \
+	bison \
+	flex \
 	cmake \
 	rlwrap \
 	guile-2.0-dev \
@@ -25,6 +29,7 @@ INSTALL_PACKAGES="
 	libbz2-dev \
 	cython \
 	python-dev \
+	python3-dev \
 	python-zmq \
 	python-simplejson \
 	libboost-date-time-dev \
@@ -67,6 +72,7 @@ TOOL_NAME=octool_rpi
 export CC_TC_DIR="RPI_OC_TC" #RPI Opencog Toolchain Container
 DEB_PKG_NAME="opencog-dev_1.0-1_armhf"
 TBB_V="2017_U7" # https://github.com/01org/tbb/archive/2017_U7.tar.gz
+LG_V="5.3.10" # https://github.com/opencog/link-grammar/archive/link-grammar-5.3.10.tar.gz
 
 usage() {
   echo "Usage: $SELF_NAME OPTION"
@@ -230,7 +236,7 @@ if [ $INSTALL_DEPS ] ; then
 	if [ $(uname -m) == "armv7l" ] ; then
 		printf "${GOOD_COLOR}okay it's an ARM... Installing packages${NORMAL_COLOR}\n"
 	        sudo apt-get install -y $APT_ARGS $INSTALL_PACKAGES
-		#TODO download and compile TBB
+		#download, compile and install TBB
 		cd /home/$USER/
 		mkdir -p tbb_temp 
 		cd tbb_temp
@@ -244,6 +250,19 @@ if [ $INSTALL_DEPS ] ; then
 		sudo ln -s libtbb.so.2 libtbb.so
 		cd /home/$USER 
 		rm -r tbb_temp 
+
+		#download, compile and instal link-grammar
+		cd /home/$USER/
+		mkdir lg_temp
+		cd lg_temp
+		wget https://github.com/opencog/link-grammar/archive/link-grammar-$LG_V.tar.gz
+		tar -xf link-grammar-$LG_V.tar.gz
+		cd link-grammar
+		./autogen.sh
+		./configure
+		make -j2
+		sudo make install
+
 
 	else
 		printf "${BAD_COLOR}Your Machine is Not ARM! The dependancy installation is for RPI only.${NORMAL_COLOR}\n"
