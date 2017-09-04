@@ -215,8 +215,7 @@ else
       c)    CC_OPENCOG=true ;;
       v)    SHOW_VERBOSE=true ;;
       h)    usage ;;
-      ?)    usage ;;
-      *)    printf "ERROR!! UNKNOWN ARGUMENT!!\n" usage ;;
+      *)    printf "ERROR!! UNKNOWN ARGUMENT!!\n"; usage ;;
     esac
   done
 fi
