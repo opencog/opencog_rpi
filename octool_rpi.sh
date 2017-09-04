@@ -257,7 +257,7 @@ if [ $INSTALL_DEPS ] ; then
 		cd lg_temp
 		wget https://github.com/opencog/link-grammar/archive/link-grammar-$LG_V.tar.gz
 		tar -xf link-grammar-$LG_V.tar.gz
-		cd link-grammar
+		cd link-grammar-link-grammar-$LG_V
 		./autogen.sh
 		./configure
 		make -j2
