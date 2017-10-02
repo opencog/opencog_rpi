@@ -62,7 +62,7 @@ ARM compiled libraries that will be needed during compilation and linking.
 
 The option ``` -t ``` downloads and arranges the files neeeded for 
 cross compiling opencog. It gets the compiler, needed libraries and 
-the opencog source code including cogutils, atomspace and opencog. 
+the opencog source code including cogutil, atomspace and opencog.
 
 The ``` -c ``` option, assumes the files are present on the expected 
 folders of the PC. It will use the downloaded compiler to cross compile
