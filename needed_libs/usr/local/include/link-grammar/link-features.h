@@ -29,9 +29,9 @@
 #endif
 
 #define LINK_MAJOR_VERSION 5
-#define LINK_MINOR_VERSION 3
-#define LINK_MICRO_VERSION 10
+#define LINK_MINOR_VERSION 4
+#define LINK_MICRO_VERSION 2
 
-#define LINK_VERSION_STRING "5.3.10"
+#define LINK_VERSION_STRING "5.4.2"
 
 #endif
