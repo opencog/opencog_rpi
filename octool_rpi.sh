@@ -62,6 +62,16 @@ INSTALL_PACKAGES="
 	libldap2-dev \
 	krb5-multidev "
 
+INSTALL_RELEX_DEPS="
+	swig \
+	zlib1g-dev \
+	wordnet-dev \
+	wordnet-sense-index \
+	openjdk-7-jdk \
+	ant \
+	libcommons-logging-java \
+	libgetopt-java "
+
 
 INSTALL_CC_PACKAGES=" python chrpath "
 
@@ -72,7 +82,8 @@ TOOL_NAME=octool_rpi
 export CC_TC_DIR="RPI_OC_TC" #RPI Opencog Toolchain Container
 DEB_PKG_NAME="opencog-dev_1.0-1_armhf"
 TBB_V="2017_U7" # https://github.com/01org/tbb/archive/2017_U7.tar.gz
-LG_V="5.3.10" # https://github.com/opencog/link-grammar/archive/link-grammar-5.3.10.tar.gz
+LG_V="5.4.2" # https://github.com/opencog/link-grammar/archive/link-grammar-5.3.10.tar.gz
+RELEX_V="1.6.2" # https://github.com/opencog/relex/archive/relex-1.6.2.tar.gz
 
 usage() {
   echo "Usage: $SELF_NAME OPTION"
@@ -116,10 +127,9 @@ setup_sys_for_cc () {
     tar -xvf master.tar.gz
     rm master.tar.gz
     for d in * ; do echo $d ; mkdir $d/build_hf ; done
-    #wget https://raw.githubusercontent.com/Dagiopia/cogutil/rpi/arm_gnueabihf_toolchain.cmake
     cd /home/$USER/$CC_TC_DIR 
     #downloading compiler and libraries
-    wget https://github.com/Dagiopia/opencog_rpi/archive/master.zip 
+    wget https://github.com/opencog/opencog_rpi/archive/master.zip 
     unzip master.zip
     mv opencog_rpi-master opencog_rpi_toolchain
     mv opencog_rpi_toolchain/arm_gnueabihf_toolchain.cmake opencog
@@ -208,7 +218,7 @@ if [ $# -eq 0 ] ; then
   printf "${BAD_COLOR}ERROR!! Please specify what to do\n${NORMAL_COLOR}"
   usage
 else
-  while getopts "dotcvh:" switch ; do
+  while getopts "drotcvh:" switch ; do
     case $switch in
       d)    INSTALL_DEPS=true ;;
       o)    INSTALL_OC=true ;;
@@ -225,6 +235,7 @@ fi
 if [ $SHOW_VERBOSE ] ; then
 	printf "${OKAY_COLOR}I will be verbose${NORMAL_COLOR}\n"
 	APT_ARGS=" -V "
+	VERBOSE=" -v "
 else
 	APT_ARGS=" -qq "
 fi
@@ -239,30 +250,58 @@ if [ $INSTALL_DEPS ] ; then
 		#download, compile and install TBB
 		cd /home/$USER/
 		mkdir -p tbb_temp 
+		rm -rf $VERBOSE /home/$USER/tbb_temp/*
 		cd tbb_temp
 		wget https://github.com/01org/tbb/archive/$TBB_V.tar.gz
-		tar -xf $TBB_V.tar.gz
+		tar $VERBOSE -xf $TBB_V.tar.gz
 		cd tbb-$TBB_V
 		make tbb CXXFLAGS+="-DTBB_USE_GCC_BUILTINS=1 -D__TBB_64BIT_ATOMICS=0"
-		sudo cp -r include/serial include/tbb /usr/local/include
-		sudo cp build/linux_armv7*_release/libtbb.so.2 /usr/local/lib/
+		sudo cp $VERBOSE -r include/serial include/tbb /usr/local/include
+		sudo cp $VERBOSE build/linux_armv7*_release/libtbb.so.2 /usr/local/lib/
 		cd /usr/local/lib
-		sudo ln -s libtbb.so.2 libtbb.so
+		sudo ln $VERBOSE -sf libtbb.so.2 libtbb.so
 		cd /home/$USER 
-		rm -r tbb_temp 
+		rm $VERBOSE -r tbb_temp 
+		sudo ldconfig
 
+		#installing relex deps
+		sudo apt-get -y install $APT_ARGS $INSTALL_RELEX_DEPS
+		
+		
 		#download, compile and instal link-grammar
 		cd /home/$USER/
-		mkdir lg_temp
+		mkdir $VERBOSE -p lg_temp
 		cd lg_temp
+		rm $VERBOSE -rf /home/$USER/lg_temp/*
 		wget https://github.com/opencog/link-grammar/archive/link-grammar-$LG_V.tar.gz
-		tar -xf link-grammar-$LG_V.tar.gz
+		tar $VERBOSE -xf link-grammar-$LG_V.tar.gz
 		cd link-grammar-link-grammar-$LG_V
 		./autogen.sh
-		./configure
+		JAVA_HOME=/usr/lib/jvm/java-7-openjdk-armhf ./configure
 		make -j2
 		sudo make install
+		cd /usr/lib/
+		sudo ln $VERBOSE -sf ../local/lib/liblink-grammar.so.5 liblink-grammar.so.5
+		sudo ldconfig
+		cd /home/$USER/
+		rm $VERBOSE -rf /home/$USER/lg_temp
 
+		#Java wordnet library
+		wget http://downloads.sourceforge.net/project/jwordnet/jwnl/JWNL%201.4/jwnl14-rc2.zip
+		unzip jwnl14-rc2.zip jwnl14-rc2/jwnl.jar
+		sudo mv -v jwnl14-rc2/jwnl.jar /usr/local/share/java/
+		rm -v jwnl14-rc2.zip && rmdir jwnl14-rc2
+		sudo chmod -v 0644 /usr/local/share/java/jwnl.jar
+				
+		#installing relex
+		cd /home/$USER
+		wget https://github.com/opencog/relex/archive/relex-$RELEX_V.tar.gz
+		tar -xf relex-$RELEX_V.tar.gz
+		cd relex-relex-$RELEX_V/
+		ant build
+		sudo ant install
+
+			
 		printf "${GOOD_COLOR}Done Installing Dependancies!${NORMAL_COLOR}\n"
 
 	else
@@ -272,12 +311,12 @@ if [ $INSTALL_DEPS ] ; then
 fi
 
 if [ $INSTALL_OC ] ; then 
-	echo "Get Compiled files from somewhere"
+	printf "${OKAY_COLOR}Get Compiled files from somewhere${NORMAL_COLOR}"
         download_install_oc
 fi
 
 if [ $INSTALL_TC ] ; then 
-	echo "Downloading Necessary CC Packages"
+	printf "${OKAY_COLOR}Downloading Necessary CC Packages${NORMAL_COLOR}"
 	#make the appropriate directories and git clone the toolchain
 	setup_sys_for_cc
 fi

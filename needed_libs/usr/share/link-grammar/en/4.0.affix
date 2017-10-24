@@ -13,7 +13,8 @@
 % Note: the ellipsis ....y must appear *before* the dot ".", else the
 % splitting won't work right.
 ")" "}" "]" ">" "".y" » 〉 ） 〕 》 】 ］ 』 」 "’’" "’" ” ''.y '.y `.y
-"%" "," ....y "." 。.y ‧ ":" ";" "?" "!" ‽ ؟ ？ ！ ….y ━.y –.y ー.y ‐.y 、.y
+"%" "," ....y "." 。 ￼ ￼  .y ‧ ":" ";" "?" "!" ‽ ؟ ？ ！
+_ ‐ ‑ ‒ – — ― ….y ━.y –.y ー.y ‐.y 、.y
 ～ ¢ ₵ ™ ℠
   : RPUNC+;
 
@@ -23,26 +24,27 @@
 % Paragraph marks
 % Assorted bullets and dingbats
 % Dashes of various sorts
-% "real" English prefixes: Y' w/
-% Y'gotta Y'gonna
-% coffe w/milk
 "(" "{" "[" "<" "".x" « 〈 （ 〔 《 【 ［
 『 「 、.x `.x `` „ ‘ “ ''.x '.x ….x ....x
 ¿ ¡ "$" US$ USD C$
 £ ₤ € ¤ ₳ ฿ ₡ ₢ ₠ ₫ ৳ ƒ ₣ ₲ ₴ ₭ ₺  ℳ  ₥ ₦ ₧ ₱ ₰ ₹ ₨ ₪ ﷼ ₸ ₮ ₩ ¥ ៛ 호점
 † †† ‡ § ¶ © ® ℗ № "#"
 * • ⁂ ❧ ☞ ◊ ※  ○  。.x ゜ ✿ ☆ ＊ ◕ ● ∇ □ ◇ ＠ ◎
-–.x ━.x ー.x -- - ‧.x
-y' w/
+_ ‐ ‑ ‒ – — ― ～ –.x ━.x ー.x -- - ‧.x
+w/
   : LPUNC+;
+
+% Split words at these.
+--.xy: MPUNC+;
 
 % Suffixes
 's 're 've 'd 'll 'm ’s ’re ’ve ’d ’ll ’m: SUF+;
 
 % Prefixes
+% "real" English prefix: y' w/
 % Y'gotta Y'gonna
-% coffe w/milk
-% y' w/: PRE+;
+% coffee w/milk
+y' w/: PRE+;
 
 % The below is a quoted list, used during tokenization. Do NOT put
 % spaces in between the various quotation marks!!
