@@ -1,1 +1,0 @@
-../../../../../../share/pyshared/ndg/httpsclient/test/test_urllib2.py
