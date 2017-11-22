@@ -1,0 +1,6 @@
+#! /bin/sh
+set -e
+if [ "$1" = rtupdate ]; then
+	pyclean -p libglib2.0-dev /usr/share/glib-2.0/codegen
+	pycompile -p libglib2.0-dev  /usr/share/glib-2.0/codegen
+fi

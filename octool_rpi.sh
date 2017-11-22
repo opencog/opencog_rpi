@@ -82,7 +82,7 @@ TOOL_NAME=octool_rpi
 export CC_TC_DIR="RPI_OC_TC" #RPI Opencog Toolchain Container
 DEB_PKG_NAME="opencog-dev_1.0-1_armhf"
 TBB_V="2017_U7" # https://github.com/01org/tbb/archive/2017_U7.tar.gz
-LG_V="5.4.2" # https://github.com/opencog/link-grammar/archive/link-grammar-5.3.10.tar.gz
+LG_V="5.4.2" # https://github.com/opencog/link-grammar/archive/link-grammar-5.4.2.tar.gz
 RELEX_V="1.6.2" # https://github.com/opencog/relex/archive/relex-1.6.2.tar.gz
 
 usage() {
@@ -100,9 +100,9 @@ usage() {
 
 
 download_install_oc () {
-	wget 144.76.153.5/opencog/opencog_rpi.deb
-	sudo dpkg -i opencog_rpi.deb
-	rm opencog_rpi.deb
+	wget 144.76.153.5/opencog/$DEB_PKG_NAME.deb
+	sudo dpkg -i $DEB_PKG_NAME.deb
+	rm $DEB_PKG_NAME.deb
 }
 
 
@@ -157,6 +157,10 @@ do_cc_for_rpi () {
     #compiling atomspace
     cd /home/$USER/$CC_TC_DIR/opencog/atomspace-master/build_hf
     rm -rf /home/$USER/$CC_TC_DIR/opencog/atomspace-master/build_hf/*
+    
+    #till we can cross compile with stack
+    rm -f /home/$USER/$CC_TC_DIR/opencog/atomspace-master/lib/FindStack.cmake 
+
     cmake -DCMAKE_TOOLCHAIN_FILE=/home/$USER/$CC_TC_DIR/opencog/arm_gnueabihf_toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/opencog_rasp/usr/local -DCMAKE_BUILD_TYPE=Release ..
     make -j$(nproc)
     make install
@@ -176,7 +180,8 @@ do_cc_for_rpi () {
 
     #package into deb
     cd /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/
-    cp -r opencog_rasp $DEB_PKG_NAME
+    sudo rm -rf $DEB_PKG_NAME
+    cp -ur opencog_rasp $DEB_PKG_NAME
     cd /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/$DEB_PKG_NAME
     find -P /home/$USER/$CC_TC_DIR/opencog_rpi_toolchain/$DEB_PKG_NAME -type l -name "*boost*" -exec rm {} \;
     mkdir ./usr/local/lib/pkgconfig DEBIAN
@@ -289,14 +294,14 @@ if [ $INSTALL_DEPS ] ; then
 		#Java wordnet library
 		wget http://downloads.sourceforge.net/project/jwordnet/jwnl/JWNL%201.4/jwnl14-rc2.zip
 		unzip jwnl14-rc2.zip jwnl14-rc2/jwnl.jar
-		sudo mv -v jwnl14-rc2/jwnl.jar /usr/local/share/java/
-		rm -v jwnl14-rc2.zip && rmdir jwnl14-rc2
-		sudo chmod -v 0644 /usr/local/share/java/jwnl.jar
+		sudo mv $VERBOSE  jwnl14-rc2/jwnl.jar /usr/local/share/java/
+		rm $VERBOSE  jwnl14-rc2.zip && rmdir jwnl14-rc2
+		sudo chmod $VERBOSE  0644 /usr/local/share/java/jwnl.jar
 				
 		#installing relex
 		cd /home/$USER
 		wget https://github.com/opencog/relex/archive/relex-$RELEX_V.tar.gz
-		tar -xf relex-$RELEX_V.tar.gz
+		tar $VERBOSE -xf relex-$RELEX_V.tar.gz
 		cd relex-relex-$RELEX_V/
 		ant build
 		sudo ant install
