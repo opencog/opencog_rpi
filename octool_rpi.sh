@@ -30,7 +30,6 @@ INSTALL_PACKAGES="
 	cython \
 	python-dev \
 	python3-dev \
-	python-zmq \
 	python-simplejson \
 	libboost-date-time-dev \
 	libboost-filesystem-dev \
@@ -42,7 +41,6 @@ INSTALL_PACKAGES="
 	libboost-system-dev \
 	libboost-random-dev \
 	libjson-spirit-dev \
-	libzmq3-dev \
 	binutils-dev \
 	unixodbc-dev \
 	libpq-dev \
