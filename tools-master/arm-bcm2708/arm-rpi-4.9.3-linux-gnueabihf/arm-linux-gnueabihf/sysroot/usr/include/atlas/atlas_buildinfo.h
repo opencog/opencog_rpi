@@ -1,0 +1,31 @@
+#ifndef ATL_INSTINFO_H
+   #define ATL_INSTINFO_H
+
+#define ATL_ARCH "GENERIC32"
+#define ATL_INSTFLAGS "-1 0 -a 1 -l 1"
+#define ATL_F2CDEFS "-DAdd_ -DF77_INTEGER=int -DStringSunStyle"
+#define ATL_ARCHDEFS "-DATL_OS_Linux -DATL_ARCH_GENERIC -DATL_GAS_ARM"
+#define ATL_DKCFLAGS "-O -fomit-frame-pointer -fPIC"
+#define ATL_DKC "/usr/bin/gcc-4.9"
+#define ATL_SKCFLAGS "-O -fomit-frame-pointer -fPIC"
+#define ATL_SKC "/usr/bin/gcc-4.9"
+#define ATL_DMCFLAGS "-O -fomit-frame-pointer -fPIC"
+#define ATL_DMC "/usr/bin/gcc-4.9"
+#define ATL_SMCFLAGS "-O -fomit-frame-pointer -fPIC"
+#define ATL_SMC "/usr/bin/gcc-4.9"
+#define ATL_ICCFLAGS "-DL2SIZE=4194304 -I/build/atlas-aPz90J/atlas-3.10.2/build/atlas-base/include -I/build/atlas-aPz90J/atlas-3.10.2/build/atlas-base/../..//include -I/build/atlas-aPz90J/atlas-3.10.2/build/atlas-base/../..//include/contrib -DAdd_ -DF77_INTEGER=int -DStringSunStyle -DATL_OS_Linux -DATL_ARCH_GENERIC -DATL_GAS_ARM -DWALL -DATL_ARM_HARDFP=1 -O -fomit-frame-pointer -fPIC"
+#define ATL_ICC "/usr/bin/gcc-4.9"
+#define ATL_F77FLAGS "-O -fPIC"
+#define ATL_F77 "/usr/bin/gfortran-4.9"
+#define ATL_DKCVERS "gcc-4.9 (Raspbian 4.9.2-10) 4.9.2"
+#define ATL_SKCVERS "gcc-4.9 (Raspbian 4.9.2-10) 4.9.2"
+#define ATL_DMCVERS "gcc-4.9 (Raspbian 4.9.2-10) 4.9.2"
+#define ATL_SMCVERS "gcc-4.9 (Raspbian 4.9.2-10) 4.9.2"
+#define ATL_ICCVERS "gcc-4.9 (Raspbian 4.9.2-10) 4.9.2"
+#define ATL_F77VERS "GNU Fortran (Raspbian 4.9.2-10) 4.9.2"
+#define ATL_SYSINFO "Linux odroid 3.10.72-23 #1 SMP PREEMPT Sat May 23 17:58:14 BRT 2015 armv7l GNU/Linux"
+#define ATL_DATE    "Mon Jun 15 19:29:53 UTC 2015"
+#define ATL_UNAM    "autoforwardporter"
+#define ATL_VERS    "3.10.2"
+
+#endif
