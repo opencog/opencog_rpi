@@ -146,7 +146,7 @@ do_cc_for_rpi () {
 
     export PATH=$PATH:$HOME/$CC_TC_DIR/opencog_rpi_toolchain/tools-master/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
     
-    cp -f $HOME/$CC_TC_DIR/opencog_rpi_toolchain/cmake/* $HOME/$CC_TC_DIR/opencog/*/build_hf
+    cp -f $HOME/$CC_TC_DIR/opencog_rpi_toolchain/cmake/* $HOME/$CC_TC_DIR/opencog/opencog-master/lib
     
     #compiling cogutil
     cd $HOME/$CC_TC_DIR/opencog/cogutil-master/build_hf
