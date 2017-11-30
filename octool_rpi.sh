@@ -300,9 +300,9 @@ if [ $INSTALL_DEPS ] ; then
 
 		#installing relex
 		cd $HOME
-		wget https://github.com/opencog/relex/archive/relex-$RELEX_V.tar.gz
-		tar $VERBOSE -xf relex-$RELEX_V.tar.gz
-		cd relex-relex-$RELEX_V/
+		wget -O relex-1.6.3.zip https://codeload.github.com/opencog/relex/zip/master
+		unzip relex-1.6.3.zip
+		cd relex-master
 		ant build
 		sudo ant install
 
