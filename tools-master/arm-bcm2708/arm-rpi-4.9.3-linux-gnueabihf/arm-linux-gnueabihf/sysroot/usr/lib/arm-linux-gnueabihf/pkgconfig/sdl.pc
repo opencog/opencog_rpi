@@ -1,0 +1,15 @@
+# sdl pkg-config source file
+
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/arm-linux-gnueabihf
+includedir=${prefix}/include
+
+Name: sdl
+Description: Simple DirectMedia Layer is a cross-platform multimedia library designed to provide low level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL, and 2D video framebuffer.
+Version: 1.2.15
+Requires:
+Conflicts:
+Libs: -L${libdir}  -lSDL
+Libs.private: -lSDL  -lpthread  -lm -ldl  -lasound -lm -ldl -lpthread -lpulse-simple -lpulse   -lX11 -lXext -L/opt/vc/lib -lbcm_host -lvcos -lvchiq_arm -L/usr/lib/arm-linux-gnueabihf -ldirectfb -lfusion -ldirect -lpthread -L/usr/lib/arm-linux-gnueabihf -lcaca -lpthread
+Cflags: -I${includedir}/SDL -D_GNU_SOURCE=1 -D_REENTRANT
