@@ -1,1 +1,0 @@
-../../../../../../needed_libs/usr/share/pyshared/ndg_httpsclient-0.3.2.egg-info/SOURCES.txt

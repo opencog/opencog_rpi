@@ -11,23 +11,15 @@
 #ifndef BOOST_INTERPROCESS_ISET_INDEX_HPP
 #define BOOST_INTERPROCESS_ISET_INDEX_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/interprocess/detail/config_begin.hpp>
 #include <boost/interprocess/detail/workaround.hpp>
 
-#include <boost/intrusive/detail/minimal_pair_header.hpp>
+#include <string>
+#include <functional>
+#include <utility>
 #include <boost/interprocess/detail/utilities.hpp>
-#include <boost/intrusive/detail/minimal_pair_header.hpp>         //std::pair
-#include <boost/intrusive/detail/minimal_less_equal_header.hpp>   //std::less
-#include <boost/container/detail/minimal_char_traits_header.hpp>  //std::char_traits
 #include <boost/intrusive/set.hpp>
+
 
 //!\file
 //!Describes index adaptor of boost::intrusive::set container, to use it
@@ -36,7 +28,7 @@
 namespace boost {
 namespace interprocess {
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
 //!Helper class to define typedefs from IndexTraits
 template <class MapConfig>
@@ -60,7 +52,7 @@ struct iset_index_aux
       , bi::base_hook<derivation_hook>
       >::type                                                  index_t;
 };
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 //!Index type based in boost::intrusive::set.
 //!Just derives from boost::intrusive::set
@@ -70,13 +62,13 @@ class iset_index
    //Derive class from map specialization
    :  public iset_index_aux<MapConfig>::index_t
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    typedef iset_index_aux<MapConfig>                     index_aux;
    typedef typename index_aux::index_t                   index_type;
    typedef typename MapConfig::
       intrusive_compare_key_type                         intrusive_compare_key_type;
    typedef typename MapConfig::char_type                 char_type;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
    typedef typename index_type::iterator                 iterator;
@@ -84,7 +76,7 @@ class iset_index
    typedef typename index_type::insert_commit_data       insert_commit_data;
    typedef typename index_type::value_type               value_type;
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
 
    struct intrusive_key_value_less
@@ -108,7 +100,7 @@ class iset_index
       }
    };
 
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
 
@@ -138,7 +130,7 @@ class iset_index
    {  return index_type::insert_check(key, intrusive_key_value_less(), commit_data); }
 };
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
 //!Trait class to detect if an index is an intrusive
 //!index.
@@ -148,7 +140,7 @@ struct is_intrusive_index
 {
    static const bool value = true;
 };
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 }  //namespace interprocess {
 }  //namespace boost

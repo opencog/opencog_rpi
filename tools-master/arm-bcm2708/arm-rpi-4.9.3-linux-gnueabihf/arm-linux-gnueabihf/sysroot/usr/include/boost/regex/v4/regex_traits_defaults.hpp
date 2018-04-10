@@ -30,15 +30,12 @@
 #pragma warning(pop)
 #endif
 
-#include <boost/regex/config.hpp>
-
 #ifndef BOOST_REGEX_SYNTAX_TYPE_HPP
 #include <boost/regex/v4/syntax_type.hpp>
 #endif
 #ifndef BOOST_REGEX_ERROR_TYPE_HPP
 #include <boost/regex/v4/error_type.hpp>
 #endif
-#include <boost/type_traits/make_unsigned.hpp>
 
 #ifdef BOOST_NO_STDC_NAMESPACE
 namespace std{
@@ -46,7 +43,7 @@ namespace std{
 }
 #endif
 
-namespace boost{ namespace BOOST_REGEX_DETAIL_NS{
+namespace boost{ namespace re_detail{
 
 
 //
@@ -54,10 +51,7 @@ namespace boost{ namespace BOOST_REGEX_DETAIL_NS{
 //
 template <class charT>
 inline bool is_extended(charT c)
-{
-   typedef typename make_unsigned<charT>::type unsigned_type; 
-   return (sizeof(charT) > 1) && (static_cast<unsigned_type>(c) >= 256u); 
-}
+{ return c > 256; }
 inline bool is_extended(char)
 { return false; }
 
@@ -159,7 +153,7 @@ struct character_pointer_range
       // calling std::equal, but there is no other algorithm available:
       // not even a non-standard MS one.  So forward to unchecked_equal
       // in the MS case.
-      return ((p2 - p1) == (r.p2 - r.p1)) && BOOST_REGEX_DETAIL_NS::equal(p1, p2, r.p1);
+      return ((p2 - p1) == (r.p2 - r.p1)) && re_detail::equal(p1, p2, r.p1);
    }
 };
 template <class charT>
@@ -360,7 +354,7 @@ inline const char* get_escape_R_string<char>()
 #endif
 }
 
-} // BOOST_REGEX_DETAIL_NS
+} // re_detail
 } // boost
 
 #ifdef BOOST_MSVC

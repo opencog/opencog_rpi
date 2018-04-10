@@ -7,7 +7,8 @@
 
 # include <boost/detail/workaround.hpp>
 
-# if !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
+# if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) \
+  && !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
 #  include <boost/type_traits/add_reference.hpp>
 #  include <boost/type_traits/remove_const.hpp>
 # endif
@@ -16,7 +17,8 @@ namespace boost { namespace parameter { namespace aux {
 
 struct use_default_tag {};
 
-# if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
+# if defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) \
+  || BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
 
 #  define BOOST_PARAMETER_FUNCTION_CAST(value, predicate) value
 

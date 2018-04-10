@@ -25,7 +25,6 @@
 #if defined(__BORLANDC__)
 #  include <boost/regex/config/borland.hpp>
 #endif
-#include <boost/version.hpp>
 
 /*****************************************************************************
  *
@@ -42,7 +41,6 @@
 #  include BOOST_REGEX_USER_CONFIG
 
 #  include <boost/config.hpp>
-#  include <boost/predef.h>
 
 #else
    /*
@@ -71,13 +69,6 @@
 #define UNICODE
 #endif
 
-
-/*
-* Define a macro for the namespace that details are placed in, this includes the Boost
-* version number to avoid mismatched header and library versions:
-*/
-#define BOOST_REGEX_DETAIL_NS BOOST_JOIN(re_detail_, BOOST_VERSION)
-
 /*
  * Fix for gcc prior to 3.4: std::ctype<wchar_t> doesn't allow
  * masks to be combined, for example:
@@ -101,13 +92,7 @@
 #if defined(_MSC_VER) && !defined(_MSC_EXTENSIONS)
 #  define BOOST_REGEX_NO_EXTERNAL_TEMPLATES
 #endif
- /*
- * Oracle compiler in C++11 mode doesn't like external templates for some reason:
- */
-#ifdef __SUNPRO_CC
-#  define BOOST_REGEX_NO_EXTERNAL_TEMPLATES
-#endif
- /*
+/*
  * Shared regex lib will crash without this, frankly it looks a lot like a gcc bug:
  */
 #if defined(__MINGW32__)
@@ -148,14 +133,8 @@
 
 /* disable our own file-iterators and mapfiles if we can't
  * support them: */
-#if defined(_WIN32)
-#  if defined(BOOST_REGEX_NO_W32) || BOOST_PLAT_WINDOWS_STORE
-#    define BOOST_REGEX_NO_FILEITER
-#  endif
-#else // defined(_WIN32)
-#  if !defined(BOOST_HAS_DIRENT_H)
-#    define BOOST_REGEX_NO_FILEITER
-#  endif
+#if !defined(BOOST_HAS_DIRENT_H) && !(defined(_WIN32) && !defined(BOOST_REGEX_NO_W32))
+#  define BOOST_REGEX_NO_FILEITER
 #endif
 
 /* backwards compatibitity: */
@@ -184,20 +163,10 @@
  * with MSVC and the /Zc:wchar_t option we place some extra unsigned short versions
  * of the non-inline functions in the library, so that users can still link to the lib,
  * irrespective of whether their own code is built with /Zc:wchar_t.
- * Note that this does NOT WORK with VC10 and VC14 when the C++ locale is in effect as
+ * Note that this does NOT WORK with VC10 when the C++ locale is in effect as
  * the locale's <unsigned short> facets simply do not compile in that case.
- * As we default to the C++ locale when compiling for the windows runtime we
- * skip in this case aswell.
  */
-#if defined(__cplusplus) && \
-      (defined(BOOST_MSVC) || defined(__ICL)) && \
-      !defined(BOOST_NO_INTRINSIC_WCHAR_T) && \
-      defined(BOOST_WINDOWS) && \
-      !defined(__SGI_STL_PORT) && \
-      !defined(_STLPORT_VERSION) && \
-      !defined(BOOST_RWSTD_VER) && \
-      ((_MSC_VER < 1600) || !defined(BOOST_REGEX_USE_CPP_LOCALE)) && \
-      !BOOST_PLAT_WINDOWS_RUNTIME
+#if defined(__cplusplus) && (defined(BOOST_MSVC) || defined(__ICL)) && !defined(BOOST_NO_INTRINSIC_WCHAR_T) && defined(BOOST_WINDOWS) && !defined(__SGI_STL_PORT) && !defined(_STLPORT_VERSION) && !defined(BOOST_RWSTD_VER) && ((_MSC_VER < 1600) || !defined(BOOST_REGEX_USE_CPP_LOCALE))
 #  define BOOST_REGEX_HAS_OTHER_WCHAR_T
 #  ifdef BOOST_MSVC
 #     pragma warning(push)
@@ -255,7 +224,7 @@
  *
  ****************************************************************************/
 
-#if defined(BOOST_MSVC) && defined(_MSC_EXTENSIONS)
+#if defined(BOOST_MSVC) && (BOOST_MSVC >= 1200) && defined(_MSC_EXTENSIONS)
 #if defined(_DEBUG) || defined(__MSVC_RUNTIME_CHECKS) || defined(_MANAGED) || defined(BOOST_REGEX_NO_FASTCALL)
 #  define BOOST_REGEX_CALL __cdecl
 #else
@@ -295,19 +264,8 @@
 #  define BOOST_REGEX_USE_C_LOCALE
 #endif
 
-/* use C++ locale when targeting windows store */
-#if BOOST_PLAT_WINDOWS_RUNTIME
-#  define BOOST_REGEX_USE_CPP_LOCALE
-#  define BOOST_REGEX_NO_WIN32_LOCALE
-#endif
-
 /* Win32 defaults to native Win32 locale: */
-#if defined(_WIN32) && \
-    !defined(BOOST_REGEX_USE_WIN32_LOCALE) && \
-    !defined(BOOST_REGEX_USE_C_LOCALE) && \
-    !defined(BOOST_REGEX_USE_CPP_LOCALE) && \
-    !defined(BOOST_REGEX_NO_W32) && \
-    !defined(BOOST_REGEX_NO_WIN32_LOCALE)
+#if defined(_WIN32) && !defined(BOOST_REGEX_USE_WIN32_LOCALE) && !defined(BOOST_REGEX_USE_C_LOCALE) && !defined(BOOST_REGEX_USE_CPP_LOCALE) && !defined(BOOST_REGEX_NO_W32)
 #  define BOOST_REGEX_USE_WIN32_LOCALE
 #endif
 /* otherwise use C++ locale if supported: */
@@ -376,7 +334,7 @@ if(0 == (x))\
 #if defined(__cplusplus) && defined(BOOST_REGEX_HAS_MS_STACK_GUARD)
 
 namespace boost{
-namespace BOOST_REGEX_DETAIL_NS{
+namespace re_detail{
 
 BOOST_REGEX_DECL void BOOST_REGEX_CALL reset_stack_guard_page();
 
@@ -429,7 +387,7 @@ BOOST_REGEX_DECL void BOOST_REGEX_CALL reset_stack_guard_page();
  ****************************************************************************/
 
 #if defined(__cplusplus) && defined(BOOST_REGEX_NON_RECURSIVE)
-namespace boost{ namespace BOOST_REGEX_DETAIL_NS{
+namespace boost{ namespace re_detail{
 
 BOOST_REGEX_DECL void* BOOST_REGEX_CALL get_mem_block();
 BOOST_REGEX_DECL void BOOST_REGEX_CALL put_mem_block(void*);

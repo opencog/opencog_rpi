@@ -16,15 +16,14 @@
 
 namespace boost{ namespace multiprecision{ namespace detail{
 
-template <class I>
-inline void round_string_up_at(std::string& s, int pos, I& expon)
+inline void round_string_up_at(std::string& s, int pos, int& expon)
 {
    //
    // Rounds up a string representation of a number at pos:
    //
    if(pos < 0)
    {
-      s.insert(static_cast<std::string::size_type>(0), 1, '1');
+      s.insert(0, 1, '1');
       s.erase(s.size() - 1);
       ++expon;
    }
@@ -65,19 +64,19 @@ std::string convert_to_string(Backend b, std::streamsize digits, std::ios_base::
 
    int fpt = eval_fpclassify(b);
 
-   if(fpt == (int)FP_ZERO)
+   if(fpt == FP_ZERO)
    {
       result = "0";
       iszero = true;
    }
-   else if(fpt == (int)FP_INFINITE)
+   else if(fpt == FP_INFINITE)
    {
       if(b.compare(ui_type(0)) < 0)
          return "-inf";
       else
          return ((f & std::ios_base::showpos) == std::ios_base::showpos) ? "+inf" : "inf";
    }
-   else if(fpt == (int)FP_NAN)
+   else if(fpt == FP_NAN)
    {
       return "nan";
    }
@@ -182,7 +181,7 @@ std::string convert_to_string(Backend b, std::streamsize digits, std::ios_base::
    }
    BOOST_ASSERT(org_digits >= 0);
    if(isneg)
-      result.insert(static_cast<std::string::size_type>(0), 1, '-');
+      result.insert(0, 1, '-');
    format_float_string(result, expon, org_digits, f, iszero);
 
    return result;

@@ -1,9 +1,8 @@
-// Copyright 2005 Daniel Wallin.
+// Copyright 2005 Daniel Wallin. 
 // Copyright 2005 Joel de Guzman.
-// Copyright 2005 Dan Marsden.
-// Copyright 2015 John Fletcher.
+// Copyright 2005 Dan Marsden. 
 //
-// Use, modification and distribution is subject to the Boost Software
+// Use, modification and distribution is subject to the Boost Software 
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -29,8 +28,7 @@
 
 #include <boost/phoenix/function/adapt_callable.hpp>
 
-//#include <boost/range/result_iterator.hpp> is deprecated
-#include <boost/range/iterator.hpp>
+#include <boost/range/result_iterator.hpp>
 #include <boost/range/difference_type.hpp>
 
 #include <boost/mpl/if.hpp>
@@ -239,12 +237,12 @@ namespace boost { namespace phoenix { namespace impl
 
         template<typename This, class R, class T>
         struct result<This(R&, T const&)>
-            : range_iterator<R>
+            : range_result_iterator<R>
         {
         };
 
         template<class R, class T>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         execute(R& r, T const& x, mpl::true_) const
         {
             r.remove(x);
@@ -252,14 +250,14 @@ namespace boost { namespace phoenix { namespace impl
         }
 
         template<class R, class T>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         execute(R& r, T const& x, mpl::false_) const
         {
             return std::remove(detail::begin_(r), detail::end_(r), x);
         }
 
         template<class R, class T>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         operator()(R& r, T const& x) const
         {
             return execute(r, x, has_remove<R>());
@@ -273,12 +271,12 @@ namespace boost { namespace phoenix { namespace impl
 
         template <typename This, class R, class P>
         struct result<This(R&,P)>
-            : range_iterator<R>
+            : range_result_iterator<R>
         {
         };
 
         template<class R, class P>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         execute(R& r, P p, mpl::true_) const
         {
             r.remove_if(p);
@@ -286,14 +284,14 @@ namespace boost { namespace phoenix { namespace impl
         }
 
         template<class R, class P>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         execute(R& r, P p, mpl::false_) const
         {
             return std::remove_if(detail::begin_(r), detail::end_(r), p);
         }
 
         template<class R, class P>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         operator()(R& r, P p) const
         {
             return execute(r, p, has_remove_if<R>());
@@ -343,16 +341,16 @@ namespace boost { namespace phoenix { namespace impl
 
         template<typename This, class R>
         struct result<This(R&)>
-            : range_iterator<R>
+            : range_result_iterator<R>
         {};
 
         template<typename This, class R, class P>
         struct result<This(R&, P)>
-            : range_iterator<R>
+            : range_result_iterator<R>
         {};
 
         template<class R>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         execute(R& r, mpl::true_) const
         {
             r.unique();
@@ -360,14 +358,14 @@ namespace boost { namespace phoenix { namespace impl
         }
 
         template<class R>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         execute(R& r, mpl::false_) const
         {
             return std::unique(detail::begin_(r), detail::end_(r));
         }
 
         template<class R>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         operator()(R& r) const
         {
             return execute(r, has_unique<R>());
@@ -375,7 +373,7 @@ namespace boost { namespace phoenix { namespace impl
 
 
         template<class R, class P>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         execute(R& r, P p, mpl::true_) const
         {
             r.unique(p);
@@ -383,14 +381,14 @@ namespace boost { namespace phoenix { namespace impl
         }
 
         template<class R, class P>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         execute(R& r, P p, mpl::false_) const
         {
             return std::unique(detail::begin_(r), detail::end_(r), p);
         }
 
         template<class R, class P>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         operator()(R& r, P p) const
         {
             return execute(r, p, has_unique<R>());
@@ -539,11 +537,11 @@ namespace boost { namespace phoenix { namespace impl
 
         template <typename This, class R, class P>
         struct result<This(R&, P)>
-            : range_iterator<R>
+            : range_result_iterator<R>
         {};
 
         template<class R, class P>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         operator()(R& r, P p) const
         {
             return std::partition(detail::begin_(r), detail::end_(r), p);
@@ -557,11 +555,11 @@ namespace boost { namespace phoenix { namespace impl
 
         template <typename This, class R, class P>
         struct result<This(R&, P)>
-            : range_iterator<R>
+            : range_result_iterator<R>
         {};
 
         template<class R, class P>
-        typename range_iterator<R>::type
+        typename range_result_iterator<R>::type
         operator()(R& r, P p) const
         {
             return std::stable_partition(detail::begin_(r), detail::end_(r), p);
@@ -650,16 +648,16 @@ namespace boost { namespace phoenix { namespace impl
         
         template <typename This, class R1, class R2>
         struct result<This(R1&, R2&)>
-            : range_iterator<R2>
+            : range_result_iterator<R2>
         {};
 
         template <typename This, class R1, class R2, class C>
         struct result<This(R1&, R2&, C)>
-            : range_iterator<R2>
+            : range_result_iterator<R2>
         {};
 
         template <class R1, class R2>
-        typename range_iterator<R2>::type
+        typename range_result_iterator<R2>::type
         operator()(R1& r1, R2& r2) const
         {
             return std::partial_sort_copy(
@@ -669,7 +667,7 @@ namespace boost { namespace phoenix { namespace impl
         }
 
         template <class R1, class R2, class C>
-        typename range_iterator<R2>::type
+        typename range_result_iterator<R2>::type
         operator()(R1& r1, R2& r2, C c) const
         {
             return std::partial_sort_copy(

@@ -8,7 +8,7 @@
 dlname='liblink-grammar-java.so.5'
 
 # Names of this library.
-library_names='liblink-grammar-java.so.5.4.2 liblink-grammar-java.so.5 liblink-grammar-java.so'
+library_names='liblink-grammar-java.so.5.4.3 liblink-grammar-java.so.5 liblink-grammar-java.so'
 
 # The name of the static archive.
 old_library='liblink-grammar-java.a'
@@ -25,7 +25,7 @@ weak_library_names=''
 # Version information for liblink-grammar-java.
 current=9
 age=4
-revision=2
+revision=3
 
 # Is this an already installed library?
 installed=yes

@@ -16,19 +16,22 @@
 #pragma once
 #endif
 
-// Windows CE define GetCurrentProcessId as an inline function in kfuncs.h
-#if !defined( BOOST_USE_WINDOWS_H ) && !defined( UNDER_CE )
-extern "C" {
-BOOST_SYMBOL_IMPORT boost::detail::winapi::DWORD_ WINAPI GetCurrentProcessId(BOOST_DETAIL_WINAPI_VOID);
-}
-#endif
-
 namespace boost {
 namespace detail {
 namespace winapi {
-using ::GetCurrentProcessId;
+#if defined( BOOST_USE_WINDOWS_H )
+    using ::GetCurrentProcessId;
+#else
+# ifndef UNDER_CE
+extern "C" { 
+    __declspec(dllimport) unsigned long __stdcall 
+        GetCurrentProcessId(void);
+}    
+# else
+    using ::GetCurrentProcessId;
+# endif
+#endif
 }
 }
 }
-
 #endif // BOOST_DETAIL_WINAPI_PROCESS_HPP

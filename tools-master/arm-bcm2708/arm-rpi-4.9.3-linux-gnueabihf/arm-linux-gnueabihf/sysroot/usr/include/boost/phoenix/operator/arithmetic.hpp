@@ -42,7 +42,6 @@ namespace boost { namespace phoenix
     using proto::exprns_::operator-=;
     using proto::exprns_::operator*=;
     using proto::exprns_::operator/=;
-    using proto::exprns_::operator%=;
     using proto::exprns_::operator+;
     using proto::exprns_::operator-;
     using proto::exprns_::operator*;

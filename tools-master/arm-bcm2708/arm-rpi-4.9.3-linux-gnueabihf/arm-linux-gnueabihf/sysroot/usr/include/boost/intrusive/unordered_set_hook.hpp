@@ -16,15 +16,13 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-
+#include <boost/pointer_cast.hpp>
+#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/slist_hook.hpp>
 #include <boost/intrusive/options.hpp>
+#include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/generic_hook.hpp>
-
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
 
 namespace boost {
 namespace intrusive {
@@ -83,7 +81,9 @@ struct unordered_node_traits
    static const bool optimize_multikey = OptimizeMultiKey;
 
    static node_ptr get_next(const const_node_ptr & n)
-   {  return pointer_traits<node_ptr>::static_cast_from(n->next_);  }
+   {
+      return pointer_traits<node_ptr>::pointer_to(static_cast<node&>(*n->next_));
+   }
 
    static void set_next(const node_ptr & n, const node_ptr & next)
    {  n->next_ = next;  }
@@ -146,11 +146,6 @@ struct unordered_algorithms
    }
 };
 
-//Class to avoid defining the same algo as a circular list, as hooks would be ambiguous between them
-template<class Algo>
-struct uset_algo_wrapper : public Algo
-{};
-
 template<class VoidPointer, bool StoreHash, bool OptimizeMultiKey>
 struct get_uset_node_algo
 {
@@ -160,9 +155,9 @@ struct get_uset_node_algo
       , slist_node_traits<VoidPointer>
       >::type node_traits_type;
    typedef typename detail::if_c
-                              < OptimizeMultiKey
-                              , unordered_algorithms<node_traits_type>
-                              , uset_algo_wrapper< circular_slist_algorithms<node_traits_type> >
+      < OptimizeMultiKey
+      , unordered_algorithms<node_traits_type>
+      , circular_slist_algorithms<node_traits_type>
       >::type type;
 };
 /// @endcond
@@ -187,10 +182,10 @@ struct make_unordered_set_base_hook
       >::type packed_options;
 
    typedef generic_hook
-   < typename get_uset_node_algo < typename packed_options::void_pointer
-                                 , packed_options::store_hash
-                                 , packed_options::optimize_multikey
-                                 >::type
+   < get_uset_node_algo<typename packed_options::void_pointer
+                       , packed_options::store_hash
+                       , packed_options::optimize_multikey
+                       >
    , typename packed_options::tag
    , packed_options::link_mode
    , HashBaseHookId
@@ -212,7 +207,7 @@ struct make_unordered_set_base_hook
 //! unique tag.
 //!
 //! \c void_pointer<> is the pointer type that will be used internally in the hook
-//! and the container configured to use this hook.
+//! and the the container configured to use this hook.
 //!
 //! \c link_mode<> will specify the linking mode of the hook (\c normal_link,
 //! \c auto_unlink or \c safe_link).
@@ -326,10 +321,10 @@ struct make_unordered_set_member_hook
       >::type packed_options;
 
    typedef generic_hook
-   < typename get_uset_node_algo< typename packed_options::void_pointer
-                                , packed_options::store_hash
-                                , packed_options::optimize_multikey
-                                >::type
+   < get_uset_node_algo< typename packed_options::void_pointer
+                       , packed_options::store_hash
+                       , packed_options::optimize_multikey
+                       >
    , member_tag
    , packed_options::link_mode
    , NoBaseHookId
@@ -346,7 +341,7 @@ struct make_unordered_set_member_hook
 //! \c link_mode<> and \c store_hash<>.
 //!
 //! \c void_pointer<> is the pointer type that will be used internally in the hook
-//! and the container configured to use this hook.
+//! and the the container configured to use this hook.
 //!
 //! \c link_mode<> will specify the linking mode of the hook (\c normal_link,
 //! \c auto_unlink or \c safe_link).

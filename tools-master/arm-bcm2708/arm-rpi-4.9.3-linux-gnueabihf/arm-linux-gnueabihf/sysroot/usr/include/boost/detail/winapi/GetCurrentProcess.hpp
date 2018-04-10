@@ -1,7 +1,6 @@
 //  GetCurrentProcess.hpp  --------------------------------------------------------------//
 
 //  Copyright 2010 Vicente J. Botet Escriba
-//  Copyright 2015 Andrey Semashev
 
 //  Distributed under the Boost Software License, Version 1.0.
 //  See http://www.boost.org/LICENSE_1_0.txt
@@ -16,19 +15,15 @@
 #pragma once
 #endif
 
-// Windows CE define GetCurrentProcess as an inline function in kfuncs.h
-#if !defined( BOOST_USE_WINDOWS_H ) && !defined( UNDER_CE )
-extern "C" {
-BOOST_SYMBOL_IMPORT boost::detail::winapi::HANDLE_ WINAPI GetCurrentProcess(BOOST_DETAIL_WINAPI_VOID);
-}
-#endif
-
 namespace boost {
 namespace detail {
 namespace winapi {
-using ::GetCurrentProcess;
+#if defined( BOOST_USE_WINDOWS_H )
+    using ::GetCurrentProcess;
+#else
+    extern "C" __declspec(dllimport) HANDLE_ WINAPI GetCurrentProcess();
+#endif
 }
 }
 }
-
 #endif // BOOST_DETAIL_WINAPI_GETCURRENTPROCESS_HPP

@@ -2,7 +2,7 @@
 #define BOOST_ARCHIVE_BASIC_POINTER_OSERIALIZER_HPP
 
 // MS compatible compilers support #pragma once
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
 # pragma once
 #endif
 
@@ -36,18 +36,22 @@ namespace serialization {
 namespace archive {
 namespace detail {
 
-class basic_oarchive;
-class basic_oserializer;
+class BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY()) basic_oarchive;
+class BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY()) basic_oserializer;
 
-class BOOST_SYMBOL_VISIBLE basic_pointer_oserializer : 
+class BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY()) basic_pointer_oserializer : 
     public basic_serializer
 {
 protected:
-    explicit BOOST_ARCHIVE_DECL basic_pointer_oserializer(
+    explicit basic_pointer_oserializer(
         const boost::serialization::extended_type_info & type_
     );
 public:
-    virtual BOOST_ARCHIVE_DECL ~basic_pointer_oserializer();
+    // account for bogus gcc warning
+    #if defined(__GNUC__)
+    virtual
+    #endif
+    ~basic_pointer_oserializer();
     virtual const basic_oserializer & get_basic_serializer() const = 0;
     virtual void save_object_ptr(
         basic_oarchive & ar,

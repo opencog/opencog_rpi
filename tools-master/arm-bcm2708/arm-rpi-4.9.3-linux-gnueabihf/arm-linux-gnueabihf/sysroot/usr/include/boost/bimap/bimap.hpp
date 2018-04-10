@@ -45,7 +45,7 @@ the next step will be:
 #ifndef BOOST_BIMAP_BIMAP_HPP
 #define BOOST_BIMAP_BIMAP_HPP
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (_MSC_VER>=1200)
 #pragma once
 #endif
 
@@ -342,7 +342,8 @@ class bimap
     template< class Tag, class IteratorType >
     BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
     iterator_type_by<Tag,bimap>::type
-        project(IteratorType iter)
+        project(IteratorType iter
+                BOOST_APPEND_EXPLICIT_TEMPLATE_TYPE(Tag))
     {
         return core.template project<Tag>(iter.base());
     }
@@ -350,7 +351,8 @@ class bimap
     template< class Tag, class IteratorType >
     BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
     const_iterator_type_by<Tag,bimap>::type
-        project(IteratorType iter) const
+        project(IteratorType iter
+                BOOST_APPEND_EXPLICIT_TEMPLATE_TYPE(Tag)) const
     {
         return core.template project<Tag>(iter.base());
     }
@@ -367,14 +369,16 @@ class bimap
 
     template< class Tag >
     BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
-    map_type_by<Tag,bimap>::type &by()
+    map_type_by<Tag,bimap>::type &
+        by(BOOST_EXPLICIT_TEMPLATE_TYPE(Tag))
     {
         return ::boost::bimaps::support::map_by<Tag>(*this);
     }
 
     template< class Tag >
     const BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
-    map_type_by<Tag,bimap>::type &by() const
+    map_type_by<Tag,bimap>::type &
+        by(BOOST_EXPLICIT_TEMPLATE_TYPE(Tag)) const
     {
         return ::boost::bimaps::support::map_by<Tag>(*this);
     }

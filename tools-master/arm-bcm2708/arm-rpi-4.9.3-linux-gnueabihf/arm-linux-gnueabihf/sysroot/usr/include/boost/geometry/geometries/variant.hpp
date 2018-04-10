@@ -16,7 +16,6 @@
 
 
 #include <boost/variant/variant_fwd.hpp>
-#include <boost/mpl/front.hpp>
 
 
 namespace boost { namespace geometry {
@@ -24,11 +23,7 @@ namespace boost { namespace geometry {
 
 template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
 struct point_type<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
-    : point_type<
-        typename boost::mpl::front<
-            typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::types
-        >::type
-    >
+    : point_type<T0>
 {};
 
 

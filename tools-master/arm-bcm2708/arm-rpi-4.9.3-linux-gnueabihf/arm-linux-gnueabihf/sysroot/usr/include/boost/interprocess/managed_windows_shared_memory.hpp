@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_MANAGED_WINDOWS_SHARED_MEMORY_HPP
 #define BOOST_INTERPROCESS_MANAGED_WINDOWS_SHARED_MEMORY_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -26,7 +22,7 @@
 #include <boost/interprocess/creation_tags.hpp>
 #include <boost/interprocess/windows_shared_memory.hpp>
 #include <boost/interprocess/permissions.hpp>
-#include <boost/move/utility_core.hpp>
+#include <boost/move/move.hpp>
 //These includes needed to fulfill default template parameters of
 //predeclarations in interprocess_fwd.hpp
 #include <boost/interprocess/mem_algo/rbtree_best_fit.hpp>
@@ -69,7 +65,7 @@ class basic_managed_windows_shared_memory
       < CharType, AllocationAlgorithm, IndexType
       , ipcdetail::wshmem_open_or_create<AllocationAlgorithm>::type::ManagedOpenOrCreateUserOffset>
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    typedef ipcdetail::basic_managed_memory_impl
       <CharType, AllocationAlgorithm, IndexType,
@@ -82,7 +78,7 @@ class basic_managed_windows_shared_memory
    private:
    typedef typename base_t::char_ptr_holder_t   char_ptr_holder_t;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(basic_managed_windows_shared_memory)
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public: //functions
    typedef typename base_t::size_type              size_type;
@@ -174,7 +170,7 @@ class basic_managed_windows_shared_memory
       m_wshm.swap(other.m_wshm);
    }
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
 
    //!Tries to find a previous named allocation address. Returns a memory
    //!buffer and the object count. If not found returned pointer is 0.
@@ -192,29 +188,8 @@ class basic_managed_windows_shared_memory
 
    private:
    typename ipcdetail::wshmem_open_or_create<AllocationAlgorithm>::type m_wshm;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
-
-#ifdef BOOST_INTERPROCESS_DOXYGEN_INVOKED
-
-//!Typedef for a default basic_managed_windows_shared_memory
-//!of narrow characters
-typedef basic_managed_windows_shared_memory
-   <char
-   ,rbtree_best_fit<mutex_family>
-   ,iset_index>
-managed_windows_shared_memory;
-
-//!Typedef for a default basic_managed_windows_shared_memory
-//!of wide characters
-typedef basic_managed_windows_shared_memory
-   <wchar_t
-   ,rbtree_best_fit<mutex_family>
-   ,iset_index>
-wmanaged_windows_shared_memory;
-
-#endif   //#ifdef BOOST_INTERPROCESS_DOXYGEN_INVOKED
-
 
 }  //namespace interprocess {
 }  //namespace boost {

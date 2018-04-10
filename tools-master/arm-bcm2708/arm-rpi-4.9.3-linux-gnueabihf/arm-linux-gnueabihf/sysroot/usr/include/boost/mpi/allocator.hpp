@@ -170,6 +170,12 @@ public:
     new ((void *)p) T(val);
   }
 
+  /* Default construct a value of type T at the location referenced by p. */
+  void construct(pointer p) 
+  {
+      new ((void *)p) T();
+  }
+
   /** Destroy the object referenced by @c p. */
   void destroy(pointer p)
   {

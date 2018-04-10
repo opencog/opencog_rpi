@@ -1,5 +1,5 @@
 /*
- *          Copyright Andrey Semashev 2007 - 2015.
+ *          Copyright Andrey Semashev 2007 - 2013.
  * Distributed under the Boost Software License, Version 1.0.
  *    (See accompanying file LICENSE_1_0.txt or copy at
  *          http://www.boost.org/LICENSE_1_0.txt)
@@ -311,7 +311,7 @@ public:
      */
     void swap(attribute_value_set& that) BOOST_NOEXCEPT
     {
-        implementation* const p = m_pImpl;
+        register implementation* const p = m_pImpl;
         m_pImpl = that.m_pImpl;
         that.m_pImpl = p;
     }
@@ -330,7 +330,7 @@ public:
      */
     BOOST_LOG_API size_type size() const;
     /*!
-     * \return \c true if there are no elements in the container, \c false otherwise.
+     * \return true if there are no elements in the container, false otherwise.
      */
     bool empty() const { return (this->size() == 0); }
 

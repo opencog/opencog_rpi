@@ -10,16 +10,14 @@
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_OVERLAY_GET_RING_HPP
 
 
+#include <boost/assert.hpp>
 #include <boost/range.hpp>
 
-#include <boost/geometry/core/assert.hpp>
+
+#include <boost/geometry/core/tags.hpp>
 #include <boost/geometry/core/exterior_ring.hpp>
 #include <boost/geometry/core/interior_rings.hpp>
-#include <boost/geometry/core/ring_type.hpp>
-#include <boost/geometry/core/tags.hpp>
 #include <boost/geometry/algorithms/detail/ring_identifier.hpp>
-#include <boost/geometry/geometries/concepts/check.hpp>
-#include <boost/geometry/util/range.hpp>
 
 
 namespace boost { namespace geometry
@@ -35,16 +33,16 @@ template<typename Tag>
 struct get_ring
 {};
 
-// A range of rings (multi-ring but that does not exist)
+// A container of rings (multi-ring but that does not exist)
 // gets the "void" tag and is dispatched here.
 template<>
 struct get_ring<void>
 {
-    template<typename Range>
-    static inline typename boost::range_value<Range>::type const&
-                apply(ring_identifier const& id, Range const& container)
+    template<typename Container>
+    static inline typename boost::range_value<Container>::type const&
+                apply(ring_identifier const& id, Container const& container)
     {
-        return range::at(container, id.multi_index);
+        return container[id.multi_index];
     }
 };
 
@@ -82,33 +80,14 @@ struct get_ring<polygon_tag>
                 ring_identifier const& id,
                 Polygon const& polygon)
     {
-        BOOST_GEOMETRY_ASSERT
+        BOOST_ASSERT
             (
                 id.ring_index >= -1
                 && id.ring_index < int(boost::size(interior_rings(polygon)))
             );
         return id.ring_index < 0
             ? exterior_ring(polygon)
-            : range::at(interior_rings(polygon), id.ring_index);
-    }
-};
-
-
-template<>
-struct get_ring<multi_polygon_tag>
-{
-    template<typename MultiPolygon>
-    static inline typename ring_type<MultiPolygon>::type const& apply(
-                ring_identifier const& id,
-                MultiPolygon const& multi_polygon)
-    {
-        BOOST_GEOMETRY_ASSERT
-            (
-                id.multi_index >= 0
-                && id.multi_index < int(boost::size(multi_polygon))
-            );
-        return get_ring<polygon_tag>::apply(id,
-                    range::at(multi_polygon, id.multi_index));
+            : interior_rings(polygon)[id.ring_index];
     }
 };
 

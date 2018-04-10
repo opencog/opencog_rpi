@@ -266,7 +266,6 @@ private:
     template <class StateType,class Enable=int>
     struct deferred_msg_queue_helper 
     {
-        void clear(){}
     };
     template <class StateType>
     struct deferred_msg_queue_helper<StateType,
@@ -275,10 +274,6 @@ private:
     {
     public:
         deferred_msg_queue_helper():m_deferred_events_queue(){}
-        void clear()
-        {
-            m_deferred_events_queue.clear();
-        }
         deferred_events_queue_t         m_deferred_events_queue;
     };
 
@@ -344,7 +339,7 @@ private:
         exit_pt():m_forward(){}
         // by assignments, we keep our forwarding functor unchanged as our containing SM did not change
     template <class RHS>
-        exit_pt(RHS&):m_forward(){}
+        exit_pt(RHS& rhs):m_forward(){}
         exit_pt<ExitPoint>& operator= (const exit_pt<ExitPoint>& ) 
         { 
             return *this; 
@@ -1274,34 +1269,22 @@ private:
         m_events_queue.m_events_queue.push_back(f);
     }
     template <class EventType>
-    void enqueue_event_helper(EventType const& , ::boost::mpl::true_ const &)
+    void enqueue_event_helper(EventType const& evt, ::boost::mpl::true_ const &)
     {
         // no queue
     }
 
     void execute_queued_events_helper(::boost::mpl::false_ const &)
     {
-        while(!m_events_queue.m_events_queue.empty())
-        {
-            transition_fct to_call = m_events_queue.m_events_queue.front();
-            m_events_queue.m_events_queue.pop_front();
-            to_call();
-        }
+        transition_fct to_call = m_events_queue.m_events_queue.front();
+        m_events_queue.m_events_queue.pop_front();
+        to_call();
     }
     void execute_queued_events_helper(::boost::mpl::true_ const &)
     {
         // no queue required
     }
-    void execute_single_queued_event_helper(::boost::mpl::false_ const &)
-    {
-        transition_fct to_call = m_events_queue.m_events_queue.front();
-        m_events_queue.m_events_queue.pop_front();
-        to_call();
-    }
-    void execute_single_queued_event_helper(::boost::mpl::true_ const &)
-    {
-        // no queue required
-    }
+
     // enqueues an event in the message queue
     // call execute_queued_events to process all queued events.
     // Be careful if you do this during event processing, the event will be processed immediately
@@ -1317,10 +1300,7 @@ private:
     {
         execute_queued_events_helper(typename is_no_message_queue<library_sm>::type());
     }
-    void execute_single_queued_event()
-    {
-        execute_single_queued_event_helper(typename is_no_message_queue<library_sm>::type());
-    }
+
     typename events_queue_t::size_type get_message_queue_size() const
     {
         return m_events_queue.m_events_queue.size();
@@ -1334,11 +1314,6 @@ private:
     const events_queue_t& get_message_queue() const
     {
         return m_events_queue.m_events_queue;
-    }
-
-    void clear_deferred_queue()
-    {
-        m_deferred_events_queue.clear();
     }
 
     deferred_events_queue_t& get_deferred_queue()
@@ -1382,7 +1357,7 @@ private:
             >::type
             ,void 
         >::type
-        operator()(T&) const
+        operator()(T& t) const
         {
             // no state to serialize
         }
@@ -1719,7 +1694,7 @@ private:
     }
     // the following functions handle pre/post-process handling  of a message queue
     template <class StateType,class EventType>
-    bool do_pre_msg_queue_helper(EventType const&, ::boost::mpl::true_ const &)
+    bool do_pre_msg_queue_helper(EventType const& evt, ::boost::mpl::true_ const &)
     {
         // no message queue needed
         return true;
@@ -1773,7 +1748,7 @@ private:
             this->exception_caught(evt,*this,e);
         }
         BOOST_CATCH_END
-        return HANDLED_TRUE;
+        return HANDLED_FALSE;
     }
     // handling of deferred events
     // if none is found in the SM, take the following empty main version
@@ -2624,9 +2599,6 @@ BOOST_PP_REPEAT(BOOST_PP_ADD(BOOST_MSM_VISITOR_ARG_SIZE,1), MSM_VISITOR_ARGS_EXE
         direct_event_start_helper(this)(incomingEvent,fsm);
         // handle messages which were generated and blocked in the init calls
         m_event_processing = false;
-        // look for deferred events waiting
-        handle_defer_helper<library_sm> defer_helper(m_deferred_events_queue);
-        defer_helper.do_post_handle_deferred(HANDLED_TRUE);
         process_message_queue(this);
      }
      template <class Event,class FsmType>
@@ -2639,11 +2611,6 @@ BOOST_PP_REPEAT(BOOST_PP_ADD(BOOST_MSM_VISITOR_ARG_SIZE,1), MSM_VISITOR_ARGS_EXE
         (static_cast<Derived*>(this))->on_exit(incomingEvent,fsm);
         // give the history a chance to handle this (or not).
         m_history.history_exit(this->m_states);
-        // history decides what happens with deferred events
-        if (!m_history.process_deferred_events(incomingEvent))
-        {
-            clear_deferred_queue();
-        }
      }
 
     // the IBM and VC<8 compilers seem to have problems with the friend declaration of dispatch_table

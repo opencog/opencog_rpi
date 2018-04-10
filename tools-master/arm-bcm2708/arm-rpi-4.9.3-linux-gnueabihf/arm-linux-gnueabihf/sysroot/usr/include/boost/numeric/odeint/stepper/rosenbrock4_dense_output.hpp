@@ -6,9 +6,8 @@
  Dense output for Rosenbrock 4.
  [end_description]
 
- Copyright 2011-2012 Karsten Ahnert
- Copyright 2011-2015 Mario Mulansky
- Copyright 2012 Christoph Koke
+ Copyright 2009-2011 Karsten Ahnert
+ Copyright 2009-2011 Mario Mulansky
 
  Distributed under the Boost Software License, Version 1.0.
  (See accompanying file LICENSE_1_0.txt or
@@ -26,8 +25,6 @@
 
 #include <boost/numeric/odeint/stepper/rosenbrock4_controller.hpp>
 #include <boost/numeric/odeint/util/is_resizeable.hpp>
-
-#include <boost/numeric/odeint/integrate/max_step_checker.hpp>
 
 
 namespace boost {
@@ -75,13 +72,16 @@ public:
     template< class System >
     std::pair< time_type , time_type > do_step( System system )
     {
-        failed_step_checker fail_checker;  // to throw a runtime_error if step size adjustment fails
+        const size_t max_count = 1000;
+
         controlled_step_result res = fail;
         m_t_old = m_t;
+        size_t count = 0;
         do
         {
             res = m_stepper.try_step( system , get_current_state() , m_t , get_old_state() , m_dt );
-            fail_checker();  // check for overflow of failed steps
+            if( count++ == max_count )
+                throw std::overflow_error( "rosenbrock4 : too much iterations!");
         }
         while( res == fail );
         m_stepper.stepper().prepare_dense_output();

@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_NAMED_SEMAPHORE_HPP
 #define BOOST_INTERPROCESS_NAMED_SEMAPHORE_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -48,13 +44,13 @@ namespace interprocess {
 //!acknowledgment mechanisms.
 class named_semaphore
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
 
    //Non-copyable
    named_semaphore();
    named_semaphore(const named_semaphore &);
    named_semaphore &operator=(const named_semaphore &);
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
    //!Creates a global semaphore with a name, and an initial count.
@@ -108,7 +104,7 @@ class named_semaphore
    //!Returns false on error. Never throws.
    static bool remove(const char *name);
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    friend class ipcdetail::interprocess_tester;
    void dont_close_on_destruction();
@@ -122,10 +118,10 @@ class named_semaphore
       typedef ipcdetail::shm_named_semaphore     impl_t;
    #endif
    impl_t m_sem;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
 inline named_semaphore::named_semaphore
    (create_only_t, const char *name, unsigned int initialCount, const permissions &perm)
@@ -157,12 +153,18 @@ inline bool named_semaphore::try_wait()
 {  return m_sem.try_wait();  }
 
 inline bool named_semaphore::timed_wait(const boost::posix_time::ptime &abs_time)
-{  return m_sem.timed_wait(abs_time);  }
+{
+   if(abs_time == boost::posix_time::pos_infin){
+      this->wait();
+      return true;
+   }
+   return m_sem.timed_wait(abs_time);
+}
 
 inline bool named_semaphore::remove(const char *name)
 {  return impl_t::remove(name);   }
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 }  //namespace interprocess {
 }  //namespace boost {

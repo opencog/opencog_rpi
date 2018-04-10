@@ -1,5 +1,5 @@
 /*
- *          Copyright Andrey Semashev 2007 - 2015.
+ *          Copyright Andrey Semashev 2007 - 2013.
  * Distributed under the Boost Software License, Version 1.0.
  *    (See accompanying file LICENSE_1_0.txt or copy at
  *          http://www.boost.org/LICENSE_1_0.txt)
@@ -26,8 +26,6 @@
 #error Boost.Log: This header content is only supported in multithreaded environment
 #endif
 
-#include <boost/memory_order.hpp>
-#include <boost/atomic/atomic.hpp>
 #include <boost/log/detail/event.hpp>
 #include <boost/log/detail/threadsafe_queue.hpp>
 #include <boost/log/core/record_view.hpp>
@@ -64,7 +62,7 @@ private:
     //! Event object to block on
     boost::log::aux::event m_event;
     //! Interruption flag
-    boost::atomic< bool > m_interruption_requested;
+    volatile bool m_interruption_requested; // TODO: make it atomic
 
 protected:
     //! Default constructor
@@ -115,8 +113,11 @@ protected:
         while (true)
         {
             m_event.wait();
-            if (m_interruption_requested.exchange(false, boost::memory_order_acquire))
+            if (m_interruption_requested)
+            {
+                m_interruption_requested = false;
                 return false;
+            }
             if (m_queue.try_pop(rec))
                 return true;
         }
@@ -125,7 +126,7 @@ protected:
     //! Wakes a thread possibly blocked in the \c dequeue method
     void interrupt_dequeue()
     {
-        m_interruption_requested.store(true, boost::memory_order_release);
+        m_interruption_requested = true;
         m_event.set_signalled();
     }
 };

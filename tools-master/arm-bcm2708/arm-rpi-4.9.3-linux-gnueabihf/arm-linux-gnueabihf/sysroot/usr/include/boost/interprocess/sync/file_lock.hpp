@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_FILE_LOCK_HPP
 #define BOOST_INTERPROCESS_FILE_LOCK_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -25,9 +21,8 @@
 #include <boost/interprocess/detail/os_file_functions.hpp>
 #include <boost/interprocess/detail/os_thread_functions.hpp>
 #include <boost/interprocess/detail/posix_time_types_wrk.hpp>
-#include <boost/interprocess/sync/detail/common_algorithms.hpp>
-#include <boost/interprocess/sync/detail/locks.hpp>
-#include <boost/move/utility_core.hpp>
+#include <boost/interprocess/sync/spin/wait.hpp>
+#include <boost/move/move.hpp>
 
 //!\file
 //!Describes a class that wraps file locking capabilities.
@@ -43,10 +38,10 @@ namespace interprocess {
 //!process so just use file locks to synchronize threads from different processes.
 class file_lock
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    //Non-copyable
    BOOST_MOVABLE_BUT_NOT_COPYABLE(file_lock)
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
    //!Constructs an empty file mapping.
@@ -143,11 +138,67 @@ class file_lock
    //!Effects: The calling thread releases the sharable ownership of the mutex.
    //!Throws: An exception derived from interprocess_exception on error.
    void unlock_sharable();
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    file_handle_t m_file_hnd;
 
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   bool timed_acquire_file_lock
+      (file_handle_t hnd, bool &acquired, const boost::posix_time::ptime &abs_time)
+   {
+      //Obtain current count and target time
+      boost::posix_time::ptime now = microsec_clock::universal_time();
+      using namespace boost::detail;
+
+      if(now >= abs_time) return false;
+      spin_wait swait;
+      do{
+         if(!ipcdetail::try_acquire_file_lock(hnd, acquired))
+            return false;
+
+         if(acquired)
+            return true;
+         else{
+            now = microsec_clock::universal_time();
+
+            if(now >= abs_time){
+               acquired = false;
+               return true;
+            }
+            // relinquish current time slice
+            swait.yield();
+         }
+      }while (true);
+   }
+
+   bool timed_acquire_file_lock_sharable
+      (file_handle_t hnd, bool &acquired, const boost::posix_time::ptime &abs_time)
+   {
+      //Obtain current count and target time
+      boost::posix_time::ptime now = microsec_clock::universal_time();
+      using namespace boost::detail;
+
+      if(now >= abs_time) return false;
+
+      spin_wait swait;
+      do{
+         if(!ipcdetail::try_acquire_file_lock_sharable(hnd, acquired))
+            return false;
+
+         if(acquired)
+            return true;
+         else{
+            now = microsec_clock::universal_time();
+
+            if(now >= abs_time){
+               acquired = false;
+               return true;
+            }
+            // relinquish current time slice
+            swait.yield();
+         }
+      }while (true);
+   }
+   /// @endcond
 };
 
 inline file_lock::file_lock(const char *name)
@@ -187,7 +238,18 @@ inline bool file_lock::try_lock()
 }
 
 inline bool file_lock::timed_lock(const boost::posix_time::ptime &abs_time)
-{  return ipcdetail::try_based_timed_lock(*this, abs_time);   }
+{
+   if(abs_time == boost::posix_time::pos_infin){
+      this->lock();
+      return true;
+   }
+   bool result;
+   if(!this->timed_acquire_file_lock(m_file_hnd, result, abs_time)){
+      error_info err(system_error_code());
+      throw interprocess_exception(err);
+   }
+   return result;
+}
 
 inline void file_lock::unlock()
 {
@@ -217,8 +279,16 @@ inline bool file_lock::try_lock_sharable()
 
 inline bool file_lock::timed_lock_sharable(const boost::posix_time::ptime &abs_time)
 {
-   ipcdetail::lock_to_sharable<file_lock> lsh(*this);
-   return ipcdetail::try_based_timed_lock(lsh, abs_time);
+   if(abs_time == boost::posix_time::pos_infin){
+      this->lock_sharable();
+      return true;
+   }
+   bool result;
+   if(!this->timed_acquire_file_lock_sharable(m_file_hnd, result, abs_time)){
+      error_info err(system_error_code());
+      throw interprocess_exception(err);
+   }
+   return result;
 }
 
 inline void file_lock::unlock_sharable()
