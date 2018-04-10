@@ -1,0 +1,30 @@
+prefix=/usr/local
+exec_prefix=/usr/local
+bindir=/usr/local/bin
+libdir=/usr/local/lib
+includedir=/usr/local/include
+datarootdir=/usr/local/share
+datadir=/usr/local/share
+pkgdatadir=/usr/local/share/guile
+pkgincludedir=/usr/local/include/guile
+
+sitedir=/usr/local/share/guile/site/2.2
+extensiondir=/usr/local/lib/guile/2.2/extensions
+siteccachedir=/usr/local/lib/guile/2.2/site-ccache
+libguileinterface=4:0:3
+
+# Actual name of the 'guile' and 'guild' programs.  This is
+# particularly useful when '--program-transform-name' or similar has
+# been used.
+guild=${bindir}/guild
+guile=${bindir}/guile
+
+Name: GNU Guile
+Description: GNU's Ubiquitous Intelligent Language for Extension
+Version: 2.2.3
+Libs: -L${libdir} -lguile-2.2 -L/usr/local/lib -lgc 
+Libs.private:  -lgmp -lltdl -lffi 	\
+  -lunistring -lcrypt  -lm   		\
+     		\
+  
+Cflags: -I${pkgincludedir}/2.2 -pthread -I/usr/local/include 
