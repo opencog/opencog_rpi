@@ -15,20 +15,17 @@
 #define BOOST_GEOMETRY_ALGORITHMS_CLEAR_HPP
 
 
-#include <boost/type_traits/remove_const.hpp>
-
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/variant_fwd.hpp>
-
 #include <boost/geometry/algorithms/not_implemented.hpp>
 #include <boost/geometry/core/access.hpp>
 #include <boost/geometry/core/exterior_ring.hpp>
 #include <boost/geometry/core/interior_rings.hpp>
 #include <boost/geometry/core/mutable_range.hpp>
 #include <boost/geometry/core/tag_cast.hpp>
-#include <boost/geometry/core/tags.hpp>
 #include <boost/geometry/geometries/concepts/check.hpp>
+#include <boost/type_traits/remove_const.hpp>
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/variant_fwd.hpp>
 
 
 namespace boost { namespace geometry
@@ -128,28 +125,16 @@ struct clear<Polygon, polygon_tag>
 
 
 template <typename Geometry>
-struct clear<Geometry, multi_tag>
-    : detail::clear::collection_clear<Geometry>
-{};
-
-
-} // namespace dispatch
-#endif // DOXYGEN_NO_DISPATCH
-
-
-namespace resolve_variant {
-
-template <typename Geometry>
-struct clear
+struct devarianted_clear
 {
     static inline void apply(Geometry& geometry)
     {
-        dispatch::clear<Geometry>::apply(geometry);
+        clear<Geometry>::apply(geometry);
     }
 };
 
 template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
-struct clear<variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
+struct devarianted_clear<variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
 {
     struct visitor: static_visitor<void>
     {
@@ -162,11 +147,13 @@ struct clear<variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
 
     static inline void apply(variant<BOOST_VARIANT_ENUM_PARAMS(T)>& geometry)
     {
-        boost::apply_visitor(visitor(), geometry);
+        apply_visitor(visitor(), geometry);
     }
 };
 
-} // namespace resolve_variant
+
+} // namespace dispatch
+#endif // DOXYGEN_NO_DISPATCH
 
 
 /*!
@@ -187,7 +174,7 @@ inline void clear(Geometry& geometry)
 {
     concept::check<Geometry>();
 
-    resolve_variant::clear<Geometry>::apply(geometry);
+    dispatch::devarianted_clear<Geometry>::apply(geometry);
 }
 
 

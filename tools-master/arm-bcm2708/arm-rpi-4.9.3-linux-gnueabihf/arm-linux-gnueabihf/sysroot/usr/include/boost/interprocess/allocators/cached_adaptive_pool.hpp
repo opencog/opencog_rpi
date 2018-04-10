@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_CACHED_ADAPTIVE_POOL_HPP
 #define BOOST_INTERPROCESS_CACHED_ADAPTIVE_POOL_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -37,7 +33,7 @@
 namespace boost {
 namespace interprocess {
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
 namespace ipcdetail {
 
@@ -95,7 +91,7 @@ class cached_adaptive_pool_v1
 
 }  //namespace ipcdetail{
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 //!An STL node allocator that uses a segment manager as memory
 //!source. The internal pointer type will of the same type (raw, smart) as
@@ -121,7 +117,7 @@ template < class T
          , unsigned char OverheadPercent
          >
 class cached_adaptive_pool
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    :  public ipcdetail::cached_allocator_impl
          < T
          , ipcdetail::shared_adaptive_node_pool
@@ -132,7 +128,7 @@ class cached_adaptive_pool
             , OverheadPercent
             >
          , 2>
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 {
 
    #ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
@@ -272,8 +268,11 @@ class cached_adaptive_pool
    //!allocate, allocation_command and allocate_many.
    size_type size(const pointer &p) const;
 
-   pointer allocation_command(boost::interprocess::allocation_type command,
-                         size_type limit_size, size_type &prefer_in_recvd_out_size, pointer &reuse);
+   std::pair<pointer, bool>
+      allocation_command(boost::interprocess::allocation_type command,
+                         size_type limit_size,
+                         size_type preferred_size,
+                         size_type &received_size, const pointer &reuse = 0);
 
    //!Allocates many elements of size elem_size in a contiguous block
    //!of memory. The minimum number to be allocated is min_elements,

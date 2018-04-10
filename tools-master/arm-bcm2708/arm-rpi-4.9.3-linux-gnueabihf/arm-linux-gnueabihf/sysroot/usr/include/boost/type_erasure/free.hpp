@@ -6,12 +6,11 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-// $Id$
+// $Id: free.hpp 83372 2013-03-09 19:14:14Z steven_watanabe $
 
 #ifndef BOOST_TYPE_ERASURE_FREE_HPP_INCLUDED
 #define BOOST_TYPE_ERASURE_FREE_HPP_INCLUDED
 
-#include <boost/detail/workaround.hpp>
 #include <boost/preprocessor/repetition/enum.hpp>
 #include <boost/preprocessor/repetition/enum_trailing.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
@@ -35,10 +34,7 @@
 #include <boost/type_erasure/call.hpp>
 #include <boost/type_erasure/concept_interface.hpp>
 
-#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || \
-    defined(BOOST_NO_CXX11_RVALUE_REFERENCES) || \
-    defined(BOOST_TYPE_ERASURE_DOXYGEN) || \
-    BOOST_WORKAROUND(BOOST_MSVC, == 1800)
+#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || defined(BOOST_NO_CXX11_RVALUE_REFERENCES) || defined(BOOST_TYPE_ERASURE_DOXYGEN)
 
 namespace boost {
 namespace type_erasure {

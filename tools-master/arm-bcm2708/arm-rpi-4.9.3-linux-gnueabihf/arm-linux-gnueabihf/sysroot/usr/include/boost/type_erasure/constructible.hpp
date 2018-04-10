@@ -6,14 +6,13 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-// $Id$
+// $Id: constructible.hpp 83321 2013-03-05 21:27:18Z steven_watanabe $
 
 #if !defined(BOOST_PP_IS_ITERATING)
 
 #ifndef BOOST_TYPE_ERASURE_CONSTRUCTIBLE_HPP_INCLUDED
 #define BOOST_TYPE_ERASURE_CONSTRUCTIBLE_HPP_INCLUDED
 
-#include <boost/detail/workaround.hpp>
 #include <boost/preprocessor/iteration/iterate.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/repetition/enum_binary_params.hpp>
@@ -61,9 +60,7 @@ struct vtable_adapter;
 template<class Sig>
 struct constructible {};
 
-#elif !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && \
-    !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && \
-    !BOOST_WORKAROUND(BOOST_MSVC, == 1800)
+#elif !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 
 template<class R, class... T>
 struct constructible<R(T...)>

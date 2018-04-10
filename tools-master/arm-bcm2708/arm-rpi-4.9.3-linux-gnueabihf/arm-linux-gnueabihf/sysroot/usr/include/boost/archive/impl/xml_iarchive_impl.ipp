@@ -18,11 +18,10 @@ namespace std{
 #endif
 
 #ifndef BOOST_NO_CWCHAR
-#include <cwchar> // mbstate_t and mbrtowc
+#include <cstdlib> // mbtowc
 #if defined(BOOST_NO_STDC_NAMESPACE)
 namespace std{ 
-    using ::mbstate_t;
-    using ::mbrtowc;
+    using ::mbtowc;
  } // namespace std
 #endif
 #endif // BOOST_NO_CWCHAR
@@ -32,7 +31,7 @@ namespace std{
 #include <boost/archive/dinkumware.hpp>
 #endif
 
-#include <boost/core/no_exceptions_support.hpp>
+#include <boost/detail/no_exceptions_support.hpp>
 
 #include <boost/archive/xml_archive_exception.hpp>
 #include <boost/archive/iterators/dataflow_exception.hpp>
@@ -52,7 +51,7 @@ namespace archive {
 #ifndef BOOST_NO_CWCHAR
 #ifndef BOOST_NO_STD_WSTRING
 template<class Archive>
-BOOST_ARCHIVE_DECL void
+BOOST_ARCHIVE_DECL(void)
 xml_iarchive_impl<Archive>::load(std::wstring &ws){
     std::string s;
     bool result = gimpl->parse_string(is, s);
@@ -65,56 +64,51 @@ xml_iarchive_impl<Archive>::load(std::wstring &ws){
     if(NULL != ws.data())
     #endif
         ws.resize(0);
-    std::mbstate_t mbs;
     const char * start = s.data();
     const char * end = start + s.size();
     while(start < end){
         wchar_t wc;
-        std::size_t result = std::mbrtowc(&wc, start, end - start, &mbs);
-        if(result == static_cast<std::size_t>(-1))
-            boost::serialization::throw_exception(
-                iterators::dataflow_exception(
-                    iterators::dataflow_exception::invalid_conversion
-                )
-            );
-        if(result == static_cast<std::size_t>(-2))
+        int resultx = std::mbtowc(&wc, start, end - start);
+        if(0 < resultx){
+            start += resultx;
+            ws += wc;
             continue;
-        start += result;
-        ws += wc;
+        }
+        boost::serialization::throw_exception(
+            iterators::dataflow_exception(
+                iterators::dataflow_exception::invalid_conversion
+            )
+        );
     }
 }
 #endif // BOOST_NO_STD_WSTRING
 
 #ifndef BOOST_NO_INTRINSIC_WCHAR_T
 template<class Archive>
-BOOST_ARCHIVE_DECL void
+BOOST_ARCHIVE_DECL(void)
 xml_iarchive_impl<Archive>::load(wchar_t * ws){
     std::string s;
     bool result = gimpl->parse_string(is, s);
     if(! result)
         boost::serialization::throw_exception(
-            xml_archive_exception(
-                xml_archive_exception::xml_archive_parsing_error
-            )
+            xml_archive_exception(xml_archive_exception::xml_archive_parsing_error)
         );
         
-    std::mbstate_t mbs;
     const char * start = s.data();
     const char * end = start + s.size();
     while(start < end){
         wchar_t wc;
-        std::size_t length = std::mbrtowc(&wc, start, end - start, &mbs);
-        if(static_cast<std::size_t>(-1) == length)
-            boost::serialization::throw_exception(
-                iterators::dataflow_exception(
-                    iterators::dataflow_exception::invalid_conversion
-                )
-            );
-        if(static_cast<std::size_t>(-2) == length)
+        int result = std::mbtowc(&wc, start, end - start);
+        if(0 < result){
+            start += result;
+            *ws++ = wc;
             continue;
-
-        start += length;
-        *ws++ = wc;
+        }
+        boost::serialization::throw_exception(
+            iterators::dataflow_exception(
+                iterators::dataflow_exception::invalid_conversion
+            )
+        );
     }
     *ws = L'\0';
 }
@@ -123,7 +117,7 @@ xml_iarchive_impl<Archive>::load(wchar_t * ws){
 #endif // BOOST_NO_CWCHAR
 
 template<class Archive>
-BOOST_ARCHIVE_DECL void
+BOOST_ARCHIVE_DECL(void)
 xml_iarchive_impl<Archive>::load(std::string &s){
     bool result = gimpl->parse_string(is, s);
     if(! result)
@@ -133,7 +127,7 @@ xml_iarchive_impl<Archive>::load(std::string &s){
 }
 
 template<class Archive>
-BOOST_ARCHIVE_DECL void
+BOOST_ARCHIVE_DECL(void)
 xml_iarchive_impl<Archive>::load(char * s){
     std::string tstring;
     bool result = gimpl->parse_string(is, tstring);
@@ -146,8 +140,8 @@ xml_iarchive_impl<Archive>::load(char * s){
 }
 
 template<class Archive>
-BOOST_ARCHIVE_DECL void
-xml_iarchive_impl<Archive>::load_override(class_name_type & t){
+BOOST_ARCHIVE_DECL(void)
+xml_iarchive_impl<Archive>::load_override(class_name_type & t, int){
     const std::string & s = gimpl->rv.class_name;
     if(s.size() > BOOST_SERIALIZATION_MAX_KEY_SIZE - 1)
         boost::serialization::throw_exception(
@@ -159,7 +153,7 @@ xml_iarchive_impl<Archive>::load_override(class_name_type & t){
 }
 
 template<class Archive>
-BOOST_ARCHIVE_DECL void
+BOOST_ARCHIVE_DECL(void)
 xml_iarchive_impl<Archive>::init(){
     gimpl->init(is);
     this->set_library_version(
@@ -168,7 +162,7 @@ xml_iarchive_impl<Archive>::init(){
 }
 
 template<class Archive>
-BOOST_ARCHIVE_DECL
+BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY())
 xml_iarchive_impl<Archive>::xml_iarchive_impl(
     std::istream &is_,
     unsigned int flags
@@ -180,12 +174,22 @@ xml_iarchive_impl<Archive>::xml_iarchive_impl(
     basic_xml_iarchive<Archive>(flags),
     gimpl(new xml_grammar())
 {
-    if(0 == (flags & no_header))
-        init();
+    if(0 == (flags & no_header)){
+        BOOST_TRY{
+            init();
+        }
+        BOOST_CATCH(...){
+            delete gimpl;
+            #ifndef BOOST_NO_EXCEPTIONS
+                throw; // re-throw
+            #endif
+        }
+        BOOST_CATCH_END
+    }
 }
 
 template<class Archive>
-BOOST_ARCHIVE_DECL
+BOOST_ARCHIVE_DECL(BOOST_PP_EMPTY())
 xml_iarchive_impl<Archive>::~xml_iarchive_impl(){
     if(0 == (this->get_flags() & no_header)){
         BOOST_TRY{
@@ -194,6 +198,7 @@ xml_iarchive_impl<Archive>::~xml_iarchive_impl(){
         BOOST_CATCH(...){}
         BOOST_CATCH_END
     }
+    delete gimpl;
 }
 } // namespace archive
 } // namespace boost

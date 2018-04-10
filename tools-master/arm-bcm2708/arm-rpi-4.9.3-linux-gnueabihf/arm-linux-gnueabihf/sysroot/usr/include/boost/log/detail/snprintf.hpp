@@ -1,5 +1,5 @@
 /*
- *          Copyright Andrey Semashev 2007 - 2015.
+ *          Copyright Andrey Semashev 2007 - 2013.
  * Distributed under the Boost Software License, Version 1.0.
  *    (See accompanying file LICENSE_1_0.txt or copy at
  *          http://www.boost.org/LICENSE_1_0.txt)
@@ -48,36 +48,47 @@ using ::vswprintf;
 
 #else // !defined(_MSC_VER)
 
-// MSVC snprintfs are not conforming but they are good enough for our cases
+#   if _MSC_VER >= 1400
+
+// MSVC 2005 and later provide the safe-CRT implementation of the conforming snprintf
 inline int vsnprintf(char* buf, std::size_t size, const char* format, std::va_list args)
 {
-    int n = _vsnprintf(buf, size, format, args);
-    if (static_cast< unsigned int >(n) >= size)
-    {
-        n = static_cast< int >(size);
-        buf[size - 1] = '\0';
-    }
+    return ::vsprintf_s(buf, size, format, args);
+}
+
+#       ifdef BOOST_LOG_USE_WCHAR_T
+inline int vswprintf(wchar_t* buf, std::size_t size, const wchar_t* format, std::va_list args)
+{
+    return ::vswprintf_s(buf, size, format, args);
+}
+#       endif // BOOST_LOG_USE_WCHAR_T
+
+#   else // _MSC_VER >= 1400
+
+// MSVC prior to 2005 had a non-conforming extension _vsnprintf, that sometimes did not put a terminating '\0'
+inline int vsnprintf(char* buf, std::size_t size, const char* format, std::va_list args)
+{
+    register int n = _vsnprintf(buf, size - 1, format, args);
+    buf[size - 1] = '\0';
     return n;
 }
 
-#   ifdef BOOST_LOG_USE_WCHAR_T
+#       ifdef BOOST_LOG_USE_WCHAR_T
 inline int vswprintf(wchar_t* buf, std::size_t size, const wchar_t* format, std::va_list args)
 {
-    int n = _vsnwprintf(buf, size, format, args);
-    if (static_cast< unsigned int >(n) >= size)
-    {
-        n = static_cast< int >(size);
-        buf[size - 1] = L'\0';
-    }
+    register int n = _vsnwprintf(buf, size - 1, format, args);
+    buf[size - 1] = L'\0';
     return n;
 }
-#   endif // BOOST_LOG_USE_WCHAR_T
+#       endif // BOOST_LOG_USE_WCHAR_T
+
+#   endif // _MSC_VER >= 1400
 
 inline int snprintf(char* buf, std::size_t size, const char* format, ...)
 {
     std::va_list args;
     va_start(args, format);
-    int n = vsnprintf(buf, size, format, args);
+    register int n = vsnprintf(buf, size, format, args);
     va_end(args);
     return n;
 }
@@ -87,7 +98,7 @@ inline int swprintf(wchar_t* buf, std::size_t size, const wchar_t* format, ...)
 {
     std::va_list args;
     va_start(args, format);
-    int n = vswprintf(buf, size, format, args);
+    register int n = vswprintf(buf, size, format, args);
     va_end(args);
     return n;
 }

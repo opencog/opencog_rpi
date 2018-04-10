@@ -1,6 +1,6 @@
 
-// Copyright Christopher Kormanyos 2002 - 2013.
-// Copyright 2011 - 2013 John Maddock. Distributed under the Boost
+// Copyright Christopher Kormanyos 2002 - 2011.
+// Copyright 2011 John Maddock. Distributed under the Boost
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
@@ -11,11 +11,6 @@
 //
 // This file has no include guards or namespaces - it's expanded inline inside default_ops.hpp
 // 
-
-#ifdef BOOST_MSVC
-#pragma warning(push)
-#pragma warning(disable:6326)  // comparison of two constants
-#endif
 
 namespace detail{
 
@@ -165,7 +160,7 @@ void hyp1F0(T& H1F0, const T& a, const T& x)
    si_type n;
    T term, part;
 
-   static const si_type series_limit =
+   static const unsigned series_limit = 
       boost::multiprecision::detail::digits2<number<T, et_on> >::value < 100
       ? 100 : boost::multiprecision::detail::digits2<number<T, et_on> >::value;
    // Series expansion of hyperg_1f0(a; ; x).
@@ -205,12 +200,12 @@ void eval_exp(T& result, const T& x)
    // Handle special arguments.
    int type = eval_fpclassify(x);
    bool isneg = eval_get_sign(x) < 0;
-   if(type == (int)FP_NAN)
+   if(type == FP_NAN)
    {
       result = x;
       return;
    }
-   else if(type == (int)FP_INFINITE)
+   else if(type == FP_INFINITE)
    {
       result = x;
       if(isneg)
@@ -219,7 +214,7 @@ void eval_exp(T& result, const T& x)
          result = x;
       return;
    }
-   else if(type == (int)FP_ZERO)
+   else if(type == FP_ZERO)
    {
       result = ui_type(1);
       return;
@@ -232,6 +227,17 @@ void eval_exp(T& result, const T& x)
       xx.negate();
 
    // Check the range of the argument.
+   static const canonical_exp_type maximum_arg_for_exp = std::numeric_limits<number<T, et_on> >::max_exponent == 0 ? (std::numeric_limits<long>::max)() : std::numeric_limits<number<T, et_on> >::max_exponent;
+
+   if(xx.compare(maximum_arg_for_exp) >= 0)
+   {
+      // Overflow / underflow
+      if(isneg)
+         result = ui_type(0);
+      else
+         result = std::numeric_limits<number<T, et_on> >::has_infinity ? std::numeric_limits<number<T, et_on> >::infinity().backend() : (std::numeric_limits<number<T, et_on> >::max)().backend();
+      return;
+   }
    if(xx.compare(si_type(1)) <= 0)
    {
       //
@@ -697,6 +703,3 @@ inline void eval_tanh(T& result, const T& x)
   eval_divide(result, c);
 }
 
-#ifdef BOOST_MSVC
-#pragma warning(pop)
-#endif

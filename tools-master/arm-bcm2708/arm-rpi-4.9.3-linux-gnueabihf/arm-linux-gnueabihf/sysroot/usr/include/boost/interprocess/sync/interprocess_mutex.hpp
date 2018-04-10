@@ -15,13 +15,9 @@
 #ifndef BOOST_INTERPROCESS_MUTEX_HPP
 #define BOOST_INTERPROCESS_MUTEX_HPP
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -54,7 +50,7 @@ class mutex_traits;
 
 #endif
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 //!\file
 //!Describes a mutex class that can be placed in memory shared by
@@ -69,7 +65,7 @@ class interprocess_condition;
 //!shared between processes. Allows timed lock tries
 class interprocess_mutex
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    //Non-copyable
    interprocess_mutex(const interprocess_mutex &);
    interprocess_mutex &operator=(const interprocess_mutex &);
@@ -93,7 +89,7 @@ class interprocess_mutex
       #error "Unknown platform for interprocess_mutex"
    #endif
 
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
    public:
 
    //!Constructor.
@@ -131,7 +127,7 @@ class interprocess_mutex
    //!Throws: interprocess_exception on error.
    void unlock();
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    internal_mutex_type &internal_mutex()
    {  return m_mutex;   }
 
@@ -140,7 +136,7 @@ class interprocess_mutex
 
    private:
    internal_mutex_type m_mutex;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
 }  //namespace interprocess {
@@ -158,7 +154,7 @@ inline void interprocess_mutex::lock()
 {
    #ifdef BOOST_INTERPROCESS_ENABLE_TIMEOUT_WHEN_LOCKING
       boost::posix_time::ptime wait_time
-         = microsec_clock::universal_time()
+         = boost::posix_time::microsec_clock::universal_time()
          + boost::posix_time::milliseconds(BOOST_INTERPROCESS_TIMEOUT_WHEN_LOCKING_DURATION_MS);
       if (!m_mutex.timed_lock(wait_time))
       {

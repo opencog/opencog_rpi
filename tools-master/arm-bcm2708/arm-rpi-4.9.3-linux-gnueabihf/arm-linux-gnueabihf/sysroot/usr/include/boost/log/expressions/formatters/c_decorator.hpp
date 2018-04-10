@@ -1,5 +1,5 @@
 /*
- *          Copyright Andrey Semashev 2007 - 2015.
+ *          Copyright Andrey Semashev 2007 - 2013.
  * Distributed under the Boost Software License, Version 1.0.
  *    (See accompanying file LICENSE_1_0.txt or copy at
  *          http://www.boost.org/LICENSE_1_0.txt)
@@ -60,13 +60,8 @@ struct c_decorator_traits< char >
     template< unsigned int N >
     static std::size_t print_escaped(char (&buf)[N], char c)
     {
-        int n = boost::log::aux::snprintf(buf, N, "\\x%.2X", static_cast< unsigned int >(static_cast< uint8_t >(c)));
-        if (n < 0)
-        {
-            n = 0;
-            buf[0] = '\0';
-        }
-        return static_cast< unsigned int >(n) >= N ? N - 1 : static_cast< unsigned int >(n);
+        return static_cast< std::size_t >(
+            boost::log::aux::snprintf(buf, N, "\\x%0.2X", static_cast< unsigned int >(static_cast< uint8_t >(c))));
     }
 };
 #endif // BOOST_LOG_USE_CHAR
@@ -95,30 +90,24 @@ struct c_decorator_traits< wchar_t >
     static std::size_t print_escaped(wchar_t (&buf)[N], wchar_t c)
     {
         const wchar_t* format;
-        unsigned int val;
+        register unsigned int val;
         if (sizeof(wchar_t) == 1)
         {
-            format = L"\\x%.2X";
+            format = L"\\x%0.2X";
             val = static_cast< uint8_t >(c);
         }
         else if (sizeof(wchar_t) == 2)
         {
-            format = L"\\x%.4X";
+            format = L"\\x%0.4X";
             val = static_cast< uint16_t >(c);
         }
         else
         {
-            format = L"\\x%.8X";
+            format = L"\\x%0.8X";
             val = static_cast< uint32_t >(c);
         }
 
-        int n = boost::log::aux::swprintf(buf, N, format, val);
-        if (n < 0)
-        {
-            n = 0;
-            buf[0] = L'\0';
-        }
-        return static_cast< unsigned int >(n) >= N ? N - 1 : static_cast< unsigned int >(n);
+        return static_cast< std::size_t >(boost::log::aux::swprintf(buf, N, format, val));
     }
 };
 #endif // BOOST_LOG_USE_WCHAR_T
@@ -148,7 +137,7 @@ struct c_decorator_gen
  * can be used to construct the actual decorator. For example:
  *
  * <code>
- * c_decor[ stream << attr< std::string >("MyAttr") ]
+ * c_decor[ attr< std::string >("MyAttr") ]
  * </code>
  *
  * For wide-character formatting there is the similar \c wc_decor decorator generator object.
@@ -231,6 +220,7 @@ struct c_ascii_decorator_gen
     template< typename SubactorT >
     BOOST_FORCEINLINE char_decorator_actor< SubactorT, c_ascii_pattern_replacer< char_type > > operator[] (SubactorT const& subactor) const
     {
+        typedef c_decorator_traits< char_type > traits_type;
         typedef c_ascii_pattern_replacer< char_type > replacer_type;
         typedef char_decorator_actor< SubactorT, replacer_type > result_type;
         typedef typename result_type::terminal_type terminal_type;
@@ -248,7 +238,7 @@ struct c_ascii_decorator_gen
  * can be used to construct the actual decorator. For example:
  *
  * <code>
- * c_ascii_decor[ stream << attr< std::string >("MyAttr") ]
+ * c_ascii_decor[ attr< std::string >("MyAttr") ]
  * </code>
  *
  * For wide-character formatting there is the similar \c wc_ascii_decor decorator generator object.

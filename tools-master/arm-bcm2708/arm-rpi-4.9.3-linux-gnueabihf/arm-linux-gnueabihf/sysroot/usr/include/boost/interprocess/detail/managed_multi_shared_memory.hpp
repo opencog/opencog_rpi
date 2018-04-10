@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_MANAGED_MULTI_SHARED_MEMORY_HPP
 #define BOOST_INTERPROCESS_MANAGED_MULTI_SHARED_MEMORY_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -24,7 +20,7 @@
 
 #include <boost/interprocess/detail/managed_memory_impl.hpp>
 #include <boost/interprocess/creation_tags.hpp>
-#include <boost/core/no_exceptions_support.hpp>
+#include <boost/detail/no_exceptions_support.hpp>
 #include <boost/interprocess/detail/multi_segment_services.hpp>
 #include <boost/interprocess/detail/utilities.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
@@ -33,13 +29,10 @@
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/permissions.hpp>
 #include <boost/interprocess/detail/managed_open_or_create_impl.hpp> //managed_open_or_create_impl
+#include <new>
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/streams/vectorstream.hpp>
-#include <boost/intrusive/detail/minimal_pair_header.hpp>
-#include <string> //string
-#include <new>    //bad_alloc
-#include <ostream>//std::ends
-
+#include <memory>
 #include <boost/assert.hpp>
 //These includes needed to fulfill default template parameters of
 //predeclarations in interprocess_fwd.hpp

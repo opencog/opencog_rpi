@@ -16,11 +16,7 @@
 #ifndef BOOST_INTERPROCESS_UPGRADABLE_LOCK_HPP
 #define BOOST_INTERPROCESS_UPGRADABLE_LOCK_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -32,7 +28,7 @@
 #include <boost/interprocess/detail/type_traits.hpp>
 
 #include <boost/interprocess/exceptions.hpp>
-#include <boost/move/utility_core.hpp>
+#include <boost/move/move.hpp>
 #include <boost/interprocess/detail/posix_time_types_wrk.hpp>
 
 //!\file
@@ -56,13 +52,13 @@ class upgradable_lock
 {
    public:
    typedef UpgradableMutex mutex_type;
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    typedef upgradable_lock<UpgradableMutex> this_type;
    explicit upgradable_lock(scoped_lock<mutex_type>&);
    typedef bool this_type::*unspecified_bool_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(upgradable_lock)
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
    public:
 
    //!Effects: Default constructs a upgradable_lock.
@@ -294,15 +290,15 @@ class upgradable_lock
    //!Throws: Nothing.
    void swap(upgradable_lock<mutex_type> &other)
    {
-      (simple_swap)(mp_mutex, other.mp_mutex);
-      (simple_swap)(m_locked, other.m_locked);
+      std::swap(mp_mutex, other.mp_mutex);
+      std::swap(m_locked, other.m_locked);
    }
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    mutex_type *mp_mutex;
    bool        m_locked;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
 } // namespace interprocess

@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_WINDOWS_NAMED_SEMAPHORE_HPP
 #define BOOST_INTERPROCESS_WINDOWS_NAMED_SEMAPHORE_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -36,13 +32,13 @@ namespace ipcdetail {
 
 class windows_named_semaphore
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
 
    //Non-copyable
    windows_named_semaphore();
    windows_named_semaphore(const windows_named_semaphore &);
    windows_named_semaphore &operator=(const windows_named_semaphore &);
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
    windows_named_semaphore(create_only_t, const char *name, unsigned int initialCount, const permissions &perm = permissions());
@@ -60,7 +56,7 @@ class windows_named_semaphore
 
    static bool remove(const char *name);
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    friend class interprocess_tester;
    void dont_close_on_destruction();
@@ -113,7 +109,7 @@ class windows_named_semaphore
       winapi_semaphore_wrapper&     m_sem_wrapper;
    };
 
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
 inline windows_named_semaphore::~windows_named_semaphore()

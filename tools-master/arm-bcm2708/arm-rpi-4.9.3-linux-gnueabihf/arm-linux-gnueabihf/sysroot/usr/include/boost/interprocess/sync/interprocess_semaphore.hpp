@@ -11,13 +11,9 @@
 #ifndef BOOST_INTERPROCESS_SEMAPHORE_HPP
 #define BOOST_INTERPROCESS_SEMAPHORE_HPP
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -29,7 +25,7 @@
 #include <boost/interprocess/detail/posix_time_types_wrk.hpp>
 
 #if !defined(BOOST_INTERPROCESS_FORCE_GENERIC_EMULATION) && \
-   (defined(BOOST_INTERPROCESS_POSIX_PROCESS_SHARED) && defined(BOOST_INTERPROCESS_POSIX_UNNAMED_SEMAPHORES))
+   (defined(BOOST_INTERPROCESS_POSIX_PROCESS_SHARED) && defined(BOOST_INTERPROCESS_POSIX_NAMED_SEMAPHORES))
    #include <boost/interprocess/sync/posix/semaphore.hpp>
    #define BOOST_INTERPROCESS_USE_POSIX
 //Experimental...
@@ -41,7 +37,7 @@
    #define BOOST_INTERPROCESS_USE_GENERIC_EMULATION
 #endif
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 //!\file
 //!Describes a interprocess_semaphore class for inter-process synchronization
@@ -53,11 +49,11 @@ namespace interprocess {
 //!shared between processes. Allows timed lock tries
 class interprocess_semaphore
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    //Non-copyable
    interprocess_semaphore(const interprocess_semaphore &);
    interprocess_semaphore &operator=(const interprocess_semaphore &);
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
    public:
    //!Creates a interprocess_semaphore with the given initial count.
    //!interprocess_exception if there is an error.*/
@@ -91,7 +87,7 @@ class interprocess_semaphore
 
    //!Returns the interprocess_semaphore count
 //   int get_count() const;
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    #if defined(BOOST_INTERPROCESS_USE_GENERIC_EMULATION)
       #undef BOOST_INTERPROCESS_USE_GENERIC_EMULATION
@@ -103,7 +99,7 @@ class interprocess_semaphore
       #undef BOOST_INTERPROCESS_USE_POSIX
       ipcdetail::posix_semaphore m_sem;
    #endif   //#if defined(BOOST_INTERPROCESS_USE_GENERIC_EMULATION)
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
 }  //namespace interprocess {
@@ -122,7 +118,7 @@ inline void interprocess_semaphore::wait()
 {
    #ifdef BOOST_INTERPROCESS_ENABLE_TIMEOUT_WHEN_LOCKING
       boost::posix_time::ptime wait_time
-         = microsec_clock::universal_time()
+         = boost::posix_time::microsec_clock::universal_time()
          + boost::posix_time::milliseconds(BOOST_INTERPROCESS_TIMEOUT_WHEN_LOCKING_DURATION_MS);
       if (!m_sem.timed_wait(wait_time))
       {

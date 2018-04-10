@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_WINDOWS_NAMED_CONDITION_ANY_HPP
 #define BOOST_INTERPROCESS_WINDOWS_NAMED_CONDITION_ANY_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -35,13 +31,13 @@ namespace ipcdetail {
 
 class windows_named_condition_any
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
 
    //Non-copyable
    windows_named_condition_any();
    windows_named_condition_any(const windows_named_condition_any &);
    windows_named_condition_any &operator=(const windows_named_condition_any &);
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
    windows_named_condition_any
@@ -98,10 +94,10 @@ class windows_named_condition_any
    static bool remove(const char *name)
    {  return windows_named_sync::remove(name);  }
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
 
-   void dont_close_on_destruction()
+   void windows_named_condition_any::dont_close_on_destruction()
    {}
 
    friend class interprocess_tester;
@@ -137,6 +133,8 @@ class windows_named_condition_any
       winapi_semaphore_wrapper   m_sem_block_lock;
       winapi_mutex_wrapper       m_mtx_unblock_lock;
    };
+
+   ipcdetail::condition_8a_wrapper<condition_data> m_condition_data;
 
    class named_cond_callbacks : public windows_named_sync_interface
    {
@@ -231,8 +229,7 @@ class windows_named_condition_any
    };
 
    windows_named_sync   m_named_sync;
-   ipcdetail::condition_8a_wrapper<condition_data> m_condition_data;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
 }  //namespace ipcdetail {

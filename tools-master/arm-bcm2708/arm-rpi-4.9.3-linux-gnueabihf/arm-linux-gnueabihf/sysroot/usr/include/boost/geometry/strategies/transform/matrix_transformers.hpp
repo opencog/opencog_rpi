@@ -1,13 +1,8 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2007-2015 Barend Gehrels, Amsterdam, the Netherlands.
-// Copyright (c) 2008-2015 Bruno Lalande, Paris, France.
-// Copyright (c) 2009-2015 Mateusz Loskot, London, UK.
-
-// This file was modified by Oracle on 2015.
-// Modifications copyright (c) 2015 Oracle and/or its affiliates.
-
-// Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
+// Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
+// Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
 // (geolib/GGL), copyright (c) 1995-2010 Geodan, Amsterdam, the Netherlands.
@@ -24,9 +19,6 @@
 
 // Remove the ublas checking, otherwise the inverse might fail
 // (while nothing seems to be wrong)
-#ifdef BOOST_UBLAS_TYPE_CHECK
-#undef BOOST_UBLAS_TYPE_CHECK
-#endif
 #define BOOST_UBLAS_TYPE_CHECK 0
 
 #include <boost/numeric/conversion/cast.hpp>
@@ -48,7 +40,6 @@
 #include <boost/geometry/core/coordinate_dimension.hpp>
 #include <boost/geometry/core/cs.hpp>
 #include <boost/geometry/util/math.hpp>
-#include <boost/geometry/util/promote_floating_point.hpp>
 #include <boost/geometry/util/select_coordinate_type.hpp>
 #include <boost/geometry/util/select_most_precise.hpp>
 
@@ -349,8 +340,7 @@ struct as_radian<degree>
     template <typename T>
     static inline T get(T const& value)
     {
-        typedef typename promote_floating_point<T>::type promoted_type;
-        return value * math::d2r<promoted_type>();
+        return value * math::d2r;
     }
 
 };

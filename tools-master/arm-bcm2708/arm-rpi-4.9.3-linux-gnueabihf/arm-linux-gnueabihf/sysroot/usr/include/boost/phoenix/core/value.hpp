@@ -12,7 +12,6 @@
 #include <boost/phoenix/core/actor.hpp>
 #include <boost/phoenix/core/as_actor.hpp>
 #include <boost/phoenix/core/terminal.hpp>
-#include <boost/phoenix/core/is_value.hpp>
 #include <boost/utility/result_of.hpp>
 
 namespace boost { namespace phoenix
@@ -30,40 +29,17 @@ namespace boost { namespace phoenix
         template <typename T>
         struct value
             : expression::terminal<T>
-        {
-            typedef
-                typename expression::terminal<T>::type
-                type;
-           /*
-            static const type make(T & t)
-            {
-                typename value<T>::type const e = {{t}};
-                return e;
-            }
-           */
-        };
+        {};
     }
 
     template <typename T>
-    inline
     typename expression::value<T>::type const
-    val(T t)
+    inline val(T t)
     {
         return expression::value<T>::make(t);
     }
 
-    // Identifies this Expr as a value.
-    // I think this is wrong. It is identifying all actors as values.
-    // Yes, it is giving false positives and needs a rethink.
-    // And this gives no positives.
-    //template <typename T>
-    //struct is_value<expression::value<T> >
-    //    : mpl::true_
-    //{};
-
     // Call out actor for special handling
-  // Is this correct? It applies to any actor.
-  // In which case why is it here?
     template<typename Expr>
     struct is_custom_terminal<actor<Expr> >
       : mpl::true_
@@ -79,20 +55,17 @@ namespace boost { namespace phoenix
         template <typename This, typename Actor, typename Context>
         struct result<This(Actor, Context)>
             : boost::remove_const<
-                    typename boost::remove_reference<
+				    typename boost::remove_reference<
                     typename evaluator::impl<Actor, Context, proto::empty_env>::result_type
-                 >::type
-             >
-        {};
+                >::type
+				>
+        {};     
 
         template <typename Context>
         typename result<custom_terminal(actor<Expr> const &, Context &)>::type
         operator()(actor<Expr> const & expr, Context & ctx) const
         {
-          typedef typename result<custom_terminal(actor<Expr> const &, Context &)>::type result_type;
-          result_type r = boost::phoenix::eval(expr, ctx);
-          // std::cout << "Evaluating val() = " << r << std::endl;
-          return r;
+            return boost::phoenix::eval(expr, ctx);
         }
     };
 

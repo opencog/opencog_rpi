@@ -7,10 +7,14 @@
 #if !defined(BOOST_FUSION_SEGMENTED_FOLD_UNTIL_HPP_INCLUDED)
 #define BOOST_FUSION_SEGMENTED_FOLD_UNTIL_HPP_INCLUDED
 
-#include <boost/fusion/support/config.hpp>
 #include <boost/type_traits/is_const.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/fusion/support/detail/segmented_fold_until_impl.hpp>
+#include <boost/fusion/view/iterator_range.hpp>
+#include <boost/fusion/sequence/intrinsic/begin.hpp>
+#include <boost/fusion/sequence/intrinsic/end.hpp>
+#include <boost/fusion/sequence/intrinsic/empty.hpp>
+#include <boost/fusion/container/list/cons.hpp>
 
 namespace boost { namespace fusion
 {
@@ -40,8 +44,7 @@ namespace boost { namespace fusion
     }
 
     template <typename Sequence, typename State, typename Fun>
-    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline typename
+    typename 
         lazy_disable_if<
             is_const<Sequence>
           , result_of::segmented_fold_until<Sequence, State, Fun>
@@ -51,19 +54,18 @@ namespace boost { namespace fusion
         typedef
             typename result_of::segmented_fold_until<Sequence, State, Fun>::filter
         filter;
-
+        
         return filter::call(seq, state, fusion::nil_(), fun);
     }
 
     template <typename Sequence, typename State, typename Fun>
-    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline typename result_of::segmented_fold_until<Sequence const, State, Fun>::type
+    typename result_of::segmented_fold_until<Sequence const, State, Fun>::type
     segmented_fold_until(Sequence const& seq, State const& state, Fun const& fun)
     {
         typedef
             typename result_of::segmented_fold_until<Sequence const, State, Fun>::filter
         filter;
-
+        
         return filter::call(seq, state, fusion::nil_(), fun);
     }
 }}

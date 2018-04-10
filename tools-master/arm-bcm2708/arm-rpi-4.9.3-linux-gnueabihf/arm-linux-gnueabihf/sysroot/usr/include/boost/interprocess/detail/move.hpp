@@ -14,15 +14,7 @@
 #ifndef BOOST_INTERPROCESS_DETAIL_MOVE_HPP
 #define BOOST_INTERPROCESS_DETAIL_MOVE_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
-#include <boost/move/utility_core.hpp>
+#include <boost/move/move.hpp>
 
 namespace boost {
 namespace interprocess {

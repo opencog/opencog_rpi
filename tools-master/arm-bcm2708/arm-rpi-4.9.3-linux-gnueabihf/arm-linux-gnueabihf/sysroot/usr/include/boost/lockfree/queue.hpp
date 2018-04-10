@@ -12,21 +12,18 @@
 #define BOOST_LOCKFREE_FIFO_HPP_INCLUDED
 
 #include <boost/assert.hpp>
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
+#include <boost/noncopyable.hpp>
+#endif
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/has_trivial_assign.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
-#include <boost/config.hpp> // for BOOST_LIKELY
 
 #include <boost/lockfree/detail/atomic.hpp>
 #include <boost/lockfree/detail/copy_payload.hpp>
 #include <boost/lockfree/detail/freelist.hpp>
 #include <boost/lockfree/detail/parameter.hpp>
 #include <boost/lockfree/detail/tagged_ptr.hpp>
-
-#ifdef BOOST_HAS_PRAGMA_ONCE
-#pragma once
-#endif
-
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -79,6 +76,9 @@ template <typename T,
 template <typename T, ...Options>
 #endif
 class queue
+#ifdef BOOST_NO_CXX11_DELETED_FUNCTIONS
+    : boost::noncopyable
+#endif
 {
 private:
 #ifndef BOOST_DOXYGEN_INVOKED
@@ -145,8 +145,11 @@ private:
 
 #endif
 
-    BOOST_DELETED_FUNCTION(queue(queue const&))
-    BOOST_DELETED_FUNCTION(queue& operator= (queue const&))
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+    queue(queue const &) = delete;
+    queue(queue &&)      = delete;
+    const queue& operator=( const queue& ) = delete;
+#endif
 
 public:
     typedef T value_type;
@@ -250,7 +253,7 @@ public:
      * \note The result is only accurate, if no other thread modifies the queue. Therefore it is rarely practical to use this
      *       value in program logic.
      * */
-    bool empty(void) const
+    bool empty(void)
     {
         return pool.get_handle(head_.load()) == pool.get_handle(tail_.load());
     }
@@ -287,6 +290,8 @@ private:
     template <bool Bounded>
     bool do_push(T const & t)
     {
+        using detail::likely;
+
         node * n = pool.template construct<true, Bounded>(t, pool.null_handle());
         handle_type node_handle = pool.get_handle(n);
 
@@ -300,7 +305,7 @@ private:
             node * next_ptr = pool.get_pointer(next);
 
             tagged_node_handle tail2 = tail_.load(memory_order_acquire);
-            if (BOOST_LIKELY(tail == tail2)) {
+            if (likely(tail == tail2)) {
                 if (next_ptr == 0) {
                     tagged_node_handle new_tail_next(node_handle, next.get_next_tag());
                     if ( tail_node->next.compare_exchange_weak(next, new_tail_next) ) {
@@ -374,6 +379,7 @@ public:
     template <typename U>
     bool pop (U & ret)
     {
+        using detail::likely;
         for (;;) {
             tagged_node_handle head = head_.load(memory_order_acquire);
             node * head_ptr = pool.get_pointer(head);
@@ -383,7 +389,7 @@ public:
             node * next_ptr = pool.get_pointer(next);
 
             tagged_node_handle head2 = head_.load(memory_order_acquire);
-            if (BOOST_LIKELY(head == head2)) {
+            if (likely(head == head2)) {
                 if (pool.get_handle(head) == pool.get_handle(tail)) {
                     if (next_ptr == 0)
                         return false;

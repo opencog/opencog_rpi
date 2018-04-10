@@ -5,6 +5,6 @@ includedir=${prefix}/include
 
 Name: link-grammar
 Description: A natural language parser based on link grammar theory
-Version: 5.3.10
+Version: 5.4.3
 Libs: -L${libdir} -llink-grammar
 Cflags: -I${includedir}

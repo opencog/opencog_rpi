@@ -11,13 +11,9 @@
 #ifndef BOOST_INTERPROCESS_CONTAINERS_CONTAINERS_FWD_HPP
 #define BOOST_INTERPROCESS_CONTAINERS_CONTAINERS_FWD_HPP
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -39,6 +35,6 @@ using boost::container::ordered_unique_range;
 
 #include <boost/interprocess/detail/config_end.hpp>
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 #endif //   #ifndef  BOOST_INTERPROCESS_CONTAINERS_CONTAINERS_FWD_HPP

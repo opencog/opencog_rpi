@@ -22,6 +22,7 @@
 #include <boost/archive/basic_archive.hpp>
 #include <boost/archive/detail/auto_link_archive.hpp>
 #include <boost/archive/detail/common_oarchive.hpp>
+#include <boost/archive/shared_ptr_helper.hpp>
 #include <boost/mpi/detail/packed_oprimitive.hpp>
 #include <boost/mpi/detail/binary_buffer_oprimitive.hpp>
 #include <boost/serialization/string.hpp>
@@ -44,10 +45,11 @@ namespace boost { namespace mpi {
  *  type and will use the @c MPI_Pack function of the underlying MPI
  *  implementation to perform serialization.
  */
-
+  
 class BOOST_MPI_DECL packed_oarchive
   : public oprimitive
   , public archive::detail::common_oarchive<packed_oarchive>
+  , public archive::detail::shared_ptr_helper
 {
 public:
   /**
@@ -67,6 +69,7 @@ public:
    *  @param position Set the offset into buffer @p b at which
    *  deserialization will begin.
    */
+   
   packed_oarchive( MPI_Comm const & comm, buffer_type & b, unsigned int flags = boost::archive::no_header)
          : oprimitive(b,comm),
            archive::detail::common_oarchive<packed_oarchive>(flags)
@@ -85,6 +88,7 @@ public:
    *  to the Boost.Serialization documentation before changing the
    *  default flags.
    */
+   
   packed_oarchive ( MPI_Comm const & comm, unsigned int flags =  boost::archive::no_header)
          : oprimitive(internal_buffer_,comm),
            archive::detail::common_oarchive<packed_oarchive>(flags)
@@ -92,44 +96,40 @@ public:
 
   // Save everything else in the usual way, forwarding on to the Base class
   template<class T>
-  void save_override(T const& x, mpl::false_)
+  void save_override(T const& x, int version, mpl::false_)
   {
-    archive::detail::common_oarchive<packed_oarchive>::save_override(x);
+    archive::detail::common_oarchive<packed_oarchive>::save_override(x,version);
   }
 
   // Save it directly using the primitives
   template<class T>
-  void save_override(T const& x, mpl::true_)
+  void save_override(T const& x, int /*version*/, mpl::true_)
   {
     oprimitive::save(x);
   }
 
   // Save all supported datatypes directly
   template<class T>
-  void save_override(T const& x)
+  void save_override(T const& x, int version)
   {
     typedef typename mpl::apply1<use_array_optimization,T>::type use_optimized;
-    save_override(x, use_optimized());
+    save_override(x, version, use_optimized());
   }
 
-  // output archives need to ignore  the optional information
-  void save_override(const archive::class_id_optional_type & ){}
+  // input archives need to ignore  the optional information 
+  void save_override(const archive::class_id_optional_type & /*t*/, int){}
 
   // explicitly convert to char * to avoid compile ambiguities
-  void save_override(const archive::class_name_type & t){
+  void save_override(const archive::class_name_type & t, int){
       const std::string s(t);
       * this->This() << s;
   }
 
-  void save_override(const archive::class_id_type & t){
+  void save_override(archive::class_id_type & t, int version){
     const boost::int_least16_t x = t;
     * this->This() << x;
   }
-
-  void save_override(const archive::version_type & t){
-    const boost::int_least8_t x = t;
-    * this->This() << x;
-  }
+  
 private:
   /// An internal buffer to be used when the user does not supply his
   /// own buffer.

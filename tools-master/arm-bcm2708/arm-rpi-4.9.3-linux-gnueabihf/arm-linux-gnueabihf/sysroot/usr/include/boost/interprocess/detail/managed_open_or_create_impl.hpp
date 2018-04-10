@@ -11,14 +11,6 @@
 #ifndef BOOST_INTERPROCESS_MANAGED_OPEN_OR_CREATE_IMPL
 #define BOOST_INTERPROCESS_MANAGED_OPEN_OR_CREATE_IMPL
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/interprocess/detail/config_begin.hpp>
 #include <boost/interprocess/detail/os_thread_functions.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
@@ -31,7 +23,8 @@
 #include <boost/interprocess/creation_tags.hpp>
 #include <boost/interprocess/detail/mpl.hpp>
 #include <boost/interprocess/permissions.hpp>
-#include <boost/container/detail/type_traits.hpp>  //alignment_of, aligned_storage
+#include <boost/type_traits/alignment_of.hpp>
+#include <boost/type_traits/type_with_alignment.hpp>
 #include <boost/interprocess/sync/spin/wait.hpp>
 #include <boost/move/move.hpp>
 #include <boost/cstdint.hpp>
@@ -39,7 +32,7 @@
 namespace boost {
 namespace interprocess {
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 namespace ipcdetail{ class interprocess_tester; }
 
 
@@ -62,7 +55,7 @@ struct managed_open_or_create_impl_device_id_t<xsi_shared_memory_file_wrapper>
 
 #endif   //BOOST_INTERPROCESS_XSI_SHARED_MEMORY_OBJECTS
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 namespace ipcdetail {
 
@@ -115,8 +108,7 @@ class managed_open_or_create_impl
          ct_rounded_size
             < sizeof(boost::uint32_t)
             , MemAlignment ? (MemAlignment) :
-               (::boost::container::container_detail::alignment_of
-                  < ::boost::container::container_detail::max_align_t >::value)
+               (::boost::alignment_of< ::boost::detail::max_align >::value)
             >::value;
 
    managed_open_or_create_impl()
@@ -318,6 +310,7 @@ class managed_open_or_create_impl
    {
       typedef bool_<FileBased> file_like_t;
       (void)mode;
+      error_info err;
       bool created = false;
       bool ronly   = false;
       bool cow     = false;
@@ -443,8 +436,7 @@ class managed_open_or_create_impl
             spin_wait swait;
             while(filesize == 0){
                if(!get_file_size(file_handle_from_mapping_handle(dev.get_mapping_handle()), filesize)){
-                  error_info err = system_error_code();
-                  throw interprocess_exception(err);
+                  throw interprocess_exception(error_info(system_error_code()));
                }
                swait.yield();
             }

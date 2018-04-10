@@ -12,6 +12,7 @@
 #include <cstddef>              /* for std::size_t */
 #include <limits>
 
+#include <boost/lockfree/detail/branch_hints.hpp>
 
 namespace boost {
 namespace lockfree {

@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_NAMED_CONDITION_HPP
 #define BOOST_INTERPROCESS_NAMED_CONDITION_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -40,21 +36,21 @@
 namespace boost {
 namespace interprocess {
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 namespace ipcdetail{ class interprocess_tester; }
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 //! A global condition variable that can be created by name.
 //! This condition variable is designed to work with named_mutex and
 //! can't be placed in shared memory or memory mapped files.
 class named_condition
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    //Non-copyable
    named_condition();
    named_condition(const named_condition &);
    named_condition &operator=(const named_condition &);
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
    public:
    //!Creates a global condition with a name.
    //!If the condition can't be created throws interprocess_exception
@@ -118,7 +114,7 @@ class named_condition
    //!Returns false on error. Never throws.
    static bool remove(const char *name);
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    #if defined(BOOST_INTERPROCESS_USE_WINDOWS)
    typedef ipcdetail::windows_named_condition   condition_type;
@@ -130,10 +126,10 @@ class named_condition
    friend class ipcdetail::interprocess_tester;
    void dont_close_on_destruction()
    {  ipcdetail::interprocess_tester::dont_close_on_destruction(m_cond); }
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
 inline named_condition::~named_condition()
 {}
@@ -181,7 +177,7 @@ inline bool named_condition::timed_wait
 template <typename L, typename Pr>
 inline bool named_condition::timed_wait
    (L& lock, const boost::posix_time::ptime &abs_time, Pr pred)
-{
+{  
    ipcdetail::internal_mutex_lock<L> internal_lock(lock);
    return m_cond.timed_wait(internal_lock, abs_time, pred);
 }
@@ -191,7 +187,7 @@ inline bool named_condition::remove(const char *name)
    return condition_type::remove(name);
 }
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 }  //namespace interprocess
 }  //namespace boost

@@ -22,7 +22,6 @@
 #include <boost/geometry/core/coordinate_type.hpp>
 #include <boost/geometry/geometries/concepts/point_concept.hpp>
 #include <boost/geometry/util/for_each_coordinate.hpp>
-#include <boost/geometry/util/select_most_precise.hpp>
 
 
 namespace boost { namespace geometry
@@ -33,94 +32,80 @@ namespace detail
 {
 
 
-template <typename Point>
+template <typename P>
 struct param
 {
     typedef typename boost::call_traits
         <
-            typename coordinate_type<Point>::type
+            typename coordinate_type<P>::type
         >::param_type type;
 };
 
 
-template <typename Value, template <typename> class Function>
+template <typename C, template <typename> class Function>
 struct value_operation
 {
-    Value m_value;
+    C m_value;
 
-    inline value_operation(Value const &value)
+    inline value_operation(C const &value)
         : m_value(value)
     {}
 
-    template <typename PointDst, std::size_t Index>
-    inline void apply(PointDst& point_dst) const
+    template <typename P, int I>
+    inline void apply(P& point) const
     {
-        set<Index>(point_dst,
-               Function
-                <
-                    typename geometry::select_most_precise
-                        <
-                            Value,
-                            typename geometry::coordinate_type<PointDst>::type
-                        >::type
-                >()(get<Index>(point_dst), m_value));
+        set<I>(point, Function<C>()(get<I>(point), m_value));
     }
 };
 
 template <typename PointSrc, template <typename> class Function>
 struct point_operation
 {
-    PointSrc const& m_point_src;
+    typedef typename coordinate_type<PointSrc>::type coordinate_type;
+    PointSrc const& m_source_point;
 
     inline point_operation(PointSrc const& point)
-        : m_point_src(point)
+        : m_source_point(point)
     {}
 
-    template <typename PointDst, std::size_t Index>
-    inline void apply(PointDst& point_dst) const
+    template <typename PointDst, int I>
+    inline void apply(PointDst& dest_point) const
     {
-        set<Index>(point_dst,
-               Function
-                <
-                    typename geometry::select_most_precise
-                        <
-                            typename geometry::coordinate_type<PointSrc>::type,
-                            typename geometry::coordinate_type<PointDst>::type
-                        >::type
-                >()(get<Index>(point_dst), get<Index>(m_point_src)));
+        set<I>(dest_point,
+            Function<coordinate_type>()(get<I>(dest_point), get<I>(m_source_point)));
     }
 };
 
 
-template <typename Value>
+template <typename C>
 struct value_assignment
 {
-    Value m_value;
+    C m_value;
 
-    inline value_assignment(Value const &value)
+    inline value_assignment(C const &value)
         : m_value(value)
     {}
 
-    template <typename PointDst, std::size_t Index>
-    inline void apply(PointDst& point_dst) const
+    template <typename P, int I>
+    inline void apply(P& point) const
     {
-        set<Index>(point_dst, m_value);
+        set<I>(point, m_value);
     }
 };
 
 template <typename PointSrc>
 struct point_assignment
 {
-    PointSrc const& m_point_src;
+    PointSrc const& m_source_point;
 
     inline point_assignment(PointSrc const& point)
-        : m_point_src(point)
+        : m_source_point(point)
     {}
 
-    template <typename PointDst, std::size_t Index>
-    inline void apply(PointDst& point_dst) const
+    template <typename PointDst, int I>
+    inline void apply(PointDst& dest_point) const
     {
-        set<Index>(point_dst, get<Index>(m_point_src));
+        set<I>(dest_point, get<I>(m_source_point));
     }
 };
 
@@ -132,7 +117,6 @@ struct point_assignment
     \brief Adds the same value to each coordinate of a point
     \ingroup arithmetic
     \details
-    \tparam Point \tparam_point
     \param p point
     \param value value to add
  */
@@ -141,12 +125,7 @@ inline void add_value(Point& p, typename detail::param<Point>::type value)
 {
     BOOST_CONCEPT_ASSERT( (concept::Point<Point>) );
 
-    for_each_coordinate(p,
-                        detail::value_operation
-                            <
-                                typename coordinate_type<Point>::type,
-                                std::plus
-                            >(value));
+    for_each_coordinate(p, detail::value_operation<typename coordinate_type<Point>::type, std::plus>(value));
 }
 
 /*!
@@ -154,15 +133,13 @@ inline void add_value(Point& p, typename detail::param<Point>::type value)
     \ingroup arithmetic
     \details The coordinates of the second point will be added to those of the first point.
              The second point is not modified.
-    \tparam Point1 \tparam_point
-    \tparam Point2 \tparam_point
     \param p1 first point
     \param p2 second point
  */
 template <typename Point1, typename Point2>
 inline void add_point(Point1& p1, Point2 const& p2)
 {
-    BOOST_CONCEPT_ASSERT( (concept::Point<Point1>) );
+    BOOST_CONCEPT_ASSERT( (concept::Point<Point2>) );
     BOOST_CONCEPT_ASSERT( (concept::ConstPoint<Point2>) );
 
     for_each_coordinate(p1, detail::point_operation<Point2, std::plus>(p2));
@@ -172,7 +149,6 @@ inline void add_point(Point1& p1, Point2 const& p2)
     \brief Subtracts the same value to each coordinate of a point
     \ingroup arithmetic
     \details
-    \tparam Point \tparam_point
     \param p point
     \param value value to subtract
  */
@@ -181,12 +157,7 @@ inline void subtract_value(Point& p, typename detail::param<Point>::type value)
 {
     BOOST_CONCEPT_ASSERT( (concept::Point<Point>) );
 
-    for_each_coordinate(p,
-                        detail::value_operation
-                            <
-                                typename coordinate_type<Point>::type,
-                                std::minus
-                            >(value));
+    for_each_coordinate(p, detail::value_operation<typename coordinate_type<Point>::type, std::minus>(value));
 }
 
 /*!
@@ -194,15 +165,13 @@ inline void subtract_value(Point& p, typename detail::param<Point>::type value)
     \ingroup arithmetic
     \details The coordinates of the second point will be subtracted to those of the first point.
              The second point is not modified.
-    \tparam Point1 \tparam_point
-    \tparam Point2 \tparam_point
     \param p1 first point
     \param p2 second point
  */
 template <typename Point1, typename Point2>
 inline void subtract_point(Point1& p1, Point2 const& p2)
 {
-    BOOST_CONCEPT_ASSERT( (concept::Point<Point1>) );
+    BOOST_CONCEPT_ASSERT( (concept::Point<Point2>) );
     BOOST_CONCEPT_ASSERT( (concept::ConstPoint<Point2>) );
 
     for_each_coordinate(p1, detail::point_operation<Point2, std::minus>(p2));
@@ -212,7 +181,6 @@ inline void subtract_point(Point1& p1, Point2 const& p2)
     \brief Multiplies each coordinate of a point by the same value
     \ingroup arithmetic
     \details
-    \tparam Point \tparam_point
     \param p point
     \param value value to multiply by
  */
@@ -221,12 +189,7 @@ inline void multiply_value(Point& p, typename detail::param<Point>::type value)
 {
     BOOST_CONCEPT_ASSERT( (concept::Point<Point>) );
 
-    for_each_coordinate(p,
-                        detail::value_operation
-                            <
-                                typename coordinate_type<Point>::type,
-                                std::multiplies
-                            >(value));
+    for_each_coordinate(p, detail::value_operation<typename coordinate_type<Point>::type, std::multiplies>(value));
 }
 
 /*!
@@ -234,8 +197,6 @@ inline void multiply_value(Point& p, typename detail::param<Point>::type value)
     \ingroup arithmetic
     \details The coordinates of the first point will be multiplied by those of the second point.
              The second point is not modified.
-    \tparam Point1 \tparam_point
-    \tparam Point2 \tparam_point
     \param p1 first point
     \param p2 second point
     \note This is *not* a dot, cross or wedge product. It is a mere field-by-field multiplication.
@@ -243,7 +204,7 @@ inline void multiply_value(Point& p, typename detail::param<Point>::type value)
 template <typename Point1, typename Point2>
 inline void multiply_point(Point1& p1, Point2 const& p2)
 {
-    BOOST_CONCEPT_ASSERT( (concept::Point<Point1>) );
+    BOOST_CONCEPT_ASSERT( (concept::Point<Point2>) );
     BOOST_CONCEPT_ASSERT( (concept::ConstPoint<Point2>) );
 
     for_each_coordinate(p1, detail::point_operation<Point2, std::multiplies>(p2));
@@ -253,7 +214,6 @@ inline void multiply_point(Point1& p1, Point2 const& p2)
     \brief Divides each coordinate of the same point by a value
     \ingroup arithmetic
     \details
-    \tparam Point \tparam_point
     \param p point
     \param value value to divide by
  */
@@ -262,12 +222,7 @@ inline void divide_value(Point& p, typename detail::param<Point>::type value)
 {
     BOOST_CONCEPT_ASSERT( (concept::Point<Point>) );
 
-    for_each_coordinate(p,
-                        detail::value_operation
-                            <
-                                typename coordinate_type<Point>::type,
-                                std::divides
-                            >(value));
+    for_each_coordinate(p, detail::value_operation<typename coordinate_type<Point>::type, std::divides>(value));
 }
 
 /*!
@@ -275,15 +230,13 @@ inline void divide_value(Point& p, typename detail::param<Point>::type value)
     \ingroup arithmetic
     \details The coordinates of the first point will be divided by those of the second point.
              The second point is not modified.
-    \tparam Point1 \tparam_point
-    \tparam Point2 \tparam_point
     \param p1 first point
     \param p2 second point
  */
 template <typename Point1, typename Point2>
 inline void divide_point(Point1& p1, Point2 const& p2)
 {
-    BOOST_CONCEPT_ASSERT( (concept::Point<Point1>) );
+    BOOST_CONCEPT_ASSERT( (concept::Point<Point2>) );
     BOOST_CONCEPT_ASSERT( (concept::ConstPoint<Point2>) );
 
     for_each_coordinate(p1, detail::point_operation<Point2, std::divides>(p2));
@@ -293,7 +246,6 @@ inline void divide_point(Point1& p1, Point2 const& p2)
     \brief Assign each coordinate of a point the same value
     \ingroup arithmetic
     \details
-    \tparam Point \tparam_point
     \param p point
     \param value value to assign
  */
@@ -302,11 +254,7 @@ inline void assign_value(Point& p, typename detail::param<Point>::type value)
 {
     BOOST_CONCEPT_ASSERT( (concept::Point<Point>) );
 
-    for_each_coordinate(p,
-                        detail::value_assignment
-                            <
-                                typename coordinate_type<Point>::type
-                            >(value));
+    for_each_coordinate(p, detail::value_assignment<typename coordinate_type<Point>::type>(value));
 }
 
 /*!
@@ -314,15 +262,13 @@ inline void assign_value(Point& p, typename detail::param<Point>::type value)
     \ingroup arithmetic
     \details The coordinates of the first point will be assigned those of the second point.
              The second point is not modified.
-    \tparam Point1 \tparam_point
-    \tparam Point2 \tparam_point
     \param p1 first point
     \param p2 second point
  */
 template <typename Point1, typename Point2>
-inline void assign_point(Point1& p1, Point2 const& p2)
+inline void assign_point(Point1& p1, const Point2& p2)
 {
-    BOOST_CONCEPT_ASSERT( (concept::Point<Point1>) );
+    BOOST_CONCEPT_ASSERT( (concept::Point<Point2>) );
     BOOST_CONCEPT_ASSERT( (concept::ConstPoint<Point2>) );
 
     for_each_coordinate(p1, detail::point_assignment<Point2>(p2));

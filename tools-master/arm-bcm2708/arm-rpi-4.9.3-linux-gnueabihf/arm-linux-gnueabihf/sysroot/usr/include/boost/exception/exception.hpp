@@ -207,12 +207,6 @@ boost
     class
     exception
         {
-        //<N3757>
-        public:
-        template <class Tag> void set( typename Tag::type const & );
-        template <class Tag> typename Tag::type const * get() const;
-        //</N3757>
-
         protected:
 
         exception():
@@ -432,11 +426,6 @@ boost
             {
             }
 
-#if defined(__GNUC__)
-# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 1) || (__GNUC__ > 4)
-#  pragma GCC visibility push (default)
-# endif
-#endif
         template <class T>
         class
         clone_impl:
@@ -478,11 +467,6 @@ boost
                 }
             };
         }
-#if defined(__GNUC__)
-# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 1) || (__GNUC__ > 4)
-#  pragma GCC visibility pop
-# endif
-#endif
 
     template <class T>
     inline

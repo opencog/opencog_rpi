@@ -761,9 +761,7 @@ typedef list<scale<2, static_rational<10> >,
         list<scale<2, static_rational<50> >,
         list<scale<2, static_rational<60> >,
         list<scale<2, static_rational<70> >,
-        list<scale<2, static_rational<80> >,
-        list<scale<2, static_rational<90> >,
-        dimensionless_type> > > > > > > > > binary_prefixes;
+        dimensionless_type> > > > > > > binary_prefixes;
 
 template<class Os, class Quantity>
 struct print_default_t {

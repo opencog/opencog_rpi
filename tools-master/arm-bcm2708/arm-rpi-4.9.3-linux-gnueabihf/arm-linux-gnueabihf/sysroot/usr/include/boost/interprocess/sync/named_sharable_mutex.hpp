@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_NAMED_SHARABLE_MUTEX_HPP
 #define BOOST_INTERPROCESS_NAMED_SHARABLE_MUTEX_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -36,9 +32,9 @@
 namespace boost {
 namespace interprocess {
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 namespace ipcdetail{ class interprocess_tester; }
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 class named_condition;
 
@@ -47,12 +43,12 @@ class named_condition;
 //!each process should have it's own named sharable mutex.
 class named_sharable_mutex
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    //Non-copyable
    named_sharable_mutex();
    named_sharable_mutex(const named_sharable_mutex &);
    named_sharable_mutex &operator=(const named_sharable_mutex &);
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
    public:
 
    //!Creates a global sharable mutex with a name.
@@ -140,7 +136,7 @@ class named_sharable_mutex
    //!Returns false on error. Never throws.
    static bool remove(const char *name);
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    friend class ipcdetail::interprocess_tester;
    void dont_close_on_destruction();
@@ -151,10 +147,10 @@ class named_sharable_mutex
    typedef ipcdetail::managed_open_or_create_impl<shared_memory_object, 0, true, false> open_create_impl_t;
    open_create_impl_t m_shmem;
    typedef ipcdetail::named_creation_functor<interprocess_sharable_mutex> construct_func_t;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
 inline named_sharable_mutex::~named_sharable_mutex()
 {}
@@ -224,7 +220,7 @@ inline bool named_sharable_mutex::timed_lock_sharable
 inline bool named_sharable_mutex::remove(const char *name)
 {  return shared_memory_object::remove(name); }
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 }  //namespace interprocess {
 }  //namespace boost {

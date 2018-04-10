@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_ADAPTIVE_POOL_HPP
 #define BOOST_INTERPROCESS_ADAPTIVE_POOL_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -30,12 +26,12 @@
 #include <boost/interprocess/detail/utilities.hpp>
 #include <boost/interprocess/detail/type_traits.hpp>
 #include <boost/interprocess/allocators/detail/adaptive_node_pool.hpp>
-#include <boost/interprocess/containers/version_type.hpp>
 #include <boost/interprocess/exceptions.hpp>
 #include <boost/interprocess/allocators/detail/allocator_common.hpp>
 #include <boost/container/detail/multiallocation_chain.hpp>
 #include <boost/interprocess/detail/mpl.hpp>
-#include <boost/move/adl_move_swap.hpp>
+#include <memory>
+#include <algorithm>
 #include <cstddef>
 
 //!\file
@@ -44,7 +40,7 @@
 namespace boost {
 namespace interprocess {
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
 namespace ipcdetail{
 
@@ -70,7 +66,7 @@ class adaptive_pool_base
    typedef adaptive_pool_base
       <Version, T, SegmentManager, NodesPerBlock, MaxFreeBlocks, OverheadPercent>   self_t;
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
 
    template <int dummy>
    struct node_pool
@@ -81,7 +77,7 @@ class adaptive_pool_base
       static type *get(void *p)
       {  return static_cast<type*>(p);  }
    };
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    BOOST_STATIC_ASSERT((Version <=2));
 
@@ -113,14 +109,14 @@ class adaptive_pool_base
       typedef adaptive_pool_base<Version, T2, SegmentManager, NodesPerBlock, MaxFreeBlocks, OverheadPercent>       other;
    };
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    //!Not assignable from related adaptive_pool_base
    template<unsigned int Version2, class T2, class SegmentManager2, std::size_t N2, std::size_t F2, unsigned char O2>
    adaptive_pool_base& operator=
       (const adaptive_pool_base<Version2, T2, SegmentManager2, N2, F2, O2>&);
 
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
    //!Constructor from a segment manager. If not present, constructs a node
@@ -141,7 +137,7 @@ class adaptive_pool_base
    adaptive_pool_base& operator=(const adaptive_pool_base &other)
    {
       adaptive_pool_base c(other);
-      boost::adl_move_swap(*this, c);
+      swap(*this, c);
       return *this;
    }
 
@@ -171,12 +167,12 @@ class adaptive_pool_base
    //!Swaps allocators. Does not throw. If each allocator is placed in a
    //!different memory segment, the result is undefined.
    friend void swap(self_t &alloc1, self_t &alloc2)
-   {  boost::adl_move_swap(alloc1.mp_node_pool, alloc2.mp_node_pool);  }
+   {  ipcdetail::do_swap(alloc1.mp_node_pool, alloc2.mp_node_pool);  }
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    void_pointer   mp_node_pool;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
 //!Equality test for same type
@@ -232,7 +228,7 @@ class adaptive_pool_v1
 
 }  //namespace ipcdetail{
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 //!An STL node allocator that uses a segment manager as memory
 //!source. The internal pointer type will of the same type (raw, smart) as
@@ -255,7 +251,7 @@ template < class T
          , unsigned char OverheadPercent
          >
 class adaptive_pool
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    :  public ipcdetail::adaptive_pool_base
          < 2
          , T
@@ -264,7 +260,7 @@ class adaptive_pool
          , MaxFreeBlocks
          , OverheadPercent
          >
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 {
 
    #ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
@@ -392,8 +388,11 @@ class adaptive_pool
    //!allocate, allocation_command and allocate_many.
    size_type size(const pointer &p) const;
 
-   pointer allocation_command(boost::interprocess::allocation_type command,
-                         size_type limit_size, size_type &prefer_in_recvd_out_size, pointer &reuse);
+   std::pair<pointer, bool>
+      allocation_command(boost::interprocess::allocation_type command,
+                         size_type limit_size,
+                         size_type preferred_size,
+                         size_type &received_size, const pointer &reuse = 0);
 
    //!Allocates many elements of size elem_size in a contiguous block
    //!of memory. The minimum number to be allocated is min_elements,

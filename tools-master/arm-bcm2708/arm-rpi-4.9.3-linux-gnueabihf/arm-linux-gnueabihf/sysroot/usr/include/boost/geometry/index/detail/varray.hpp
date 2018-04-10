@@ -1,6 +1,6 @@
 // Boost.Container varray
 //
-// Copyright (c) 2012-2015 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2012-2013 Adam Wulkiewicz, Lodz, Poland.
 // Copyright (c) 2011-2013 Andrew Hundt.
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -13,10 +13,7 @@
 // TODO - REMOVE/CHANGE
 #include <boost/container/detail/config_begin.hpp>
 #include <boost/container/detail/workaround.hpp>
-
-#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
-#include <boost/move/detail/fwd_macros.hpp>
-#endif
+#include <boost/container/detail/preprocessor.hpp>
 
 #include <boost/config.hpp>
 #include <boost/swap.hpp>
@@ -35,11 +32,12 @@
 #include <boost/iterator/iterator_concepts.hpp>
 
 #include <boost/geometry/index/detail/assert.hpp>
-#include <boost/geometry/index/detail/exception.hpp>
 
+#include <boost/geometry/index/detail/assert.hpp>
 #include <boost/geometry/index/detail/varray_detail.hpp>
 
 #include <boost/concept_check.hpp>
+#include <boost/throw_exception.hpp>
 
 /*!
 \defgroup varray_non_member varray non-member functions
@@ -81,8 +79,12 @@ struct checker
 
     static inline void throw_out_of_bounds(Varray const& v, size_type i)
     {
+//#ifndef BOOST_NO_EXCEPTIONS
         if ( v.size() <= i )
-            throw_out_of_range("index out of bounds");
+            BOOST_THROW_EXCEPTION(std::out_of_range("index out of bounds"));
+//#else // BOOST_NO_EXCEPTIONS
+//        BOOST_GEOMETRY_INDEX_ASSERT(i < v.size(), "index out of bounds");
+//#endif // BOOST_NO_EXCEPTIONS
 
         ::boost::ignore_unused_variable_warning(v);
         ::boost::ignore_unused_variable_warning(i);
@@ -176,7 +178,7 @@ class varray
 
     BOOST_COPYABLE_AND_MOVABLE(varray)
 
-#ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
+#ifdef BOOST_NO_RVALUE_REFERENCES
 public:
     template <std::size_t C>
     varray & operator=(varray<Value, C> & sv)
@@ -361,7 +363,12 @@ public:
     //! @par Complexity
     //!   Linear O(N).
     template <std::size_t C>
-    varray & operator=(BOOST_COPY_ASSIGN_REF_2_TEMPL_ARGS(varray, value_type, C) other)
+// TEMPORARY WORKAROUND
+#if defined(BOOST_NO_RVALUE_REFERENCES)
+    varray & operator=(::boost::rv< varray<value_type, C> > const& other)
+#else
+    varray & operator=(varray<value_type, C> const& other)
+#endif
     {
         this->assign(other.begin(), other.end());                                     // may throw
 
@@ -918,9 +925,9 @@ public:
         difference_type n = std::distance(first, last);
         
         //TODO - add invalid range check?
-        //BOOST_GEOMETRY_INDEX_ASSERT(0 <= n, "invalid range");
+        //BOOST_ASSERT_MSG(0 <= n, "invalid range");
         //TODO - add this->size() check?
-        //BOOST_GEOMETRY_INDEX_ASSERT(n <= this->size(), "invalid range");
+        //BOOST_ASSERT_MSG(n <= this->size(), "invalid range");
 
         sv::move(last, this->end(), first);                                         // may throw
         sv::destroy(this->end() - n, this->end());
@@ -982,7 +989,7 @@ public:
     }
 
 #if !defined(BOOST_CONTAINER_VARRAY_DISABLE_EMPLACE)
-#if !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || defined(BOOST_CONTAINER_DOXYGEN_INVOKED)
+#if defined(BOOST_CONTAINER_PERFECT_FORWARDING) || defined(BOOST_CONTAINER_DOXYGEN_INVOKED)
     //! @pre <tt>size() < capacity()</tt>
     //!
     //! @brief Inserts a Value constructed with
@@ -1063,23 +1070,27 @@ public:
         return position;
     }
 
-#else // !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || defined(BOOST_CONTAINER_DOXYGEN_INVOKED)
+#else // BOOST_CONTAINER_PERFECT_FORWARDING || BOOST_CONTAINER_DOXYGEN_INVOKED
 
-    #define BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_EMPLACE(N)                                        \
-    BOOST_MOVE_TMPL_LT##N BOOST_MOVE_CLASS##N BOOST_MOVE_GT##N                                   \
-    void emplace_back(BOOST_MOVE_UREF##N)                                                        \
+    #define BOOST_PP_LOCAL_MACRO(n)                                                              \
+    BOOST_PP_EXPR_IF(n, template<) BOOST_PP_ENUM_PARAMS(n, class P) BOOST_PP_EXPR_IF(n, >)       \
+    void emplace_back(BOOST_PP_ENUM(n, BOOST_CONTAINER_PP_PARAM_LIST, _))                        \
     {                                                                                            \
         typedef typename vt::disable_trivial_init dti;                                           \
                                                                                                  \
         errh::check_capacity(*this, m_size + 1);                                    /*may throw*/\
                                                                                                  \
-        namespace sv = varray_detail;                                                            \
-        sv::construct(dti(), this->end() BOOST_MOVE_I##N BOOST_MOVE_FWD##N );       /*may throw*/\
+        namespace sv = varray_detail;                                                     \
+        sv::construct(dti(), this->end() BOOST_PP_ENUM_TRAILING(n, BOOST_CONTAINER_PP_PARAM_FORWARD, _) ); /*may throw*/\
         ++m_size; /*update end*/                                                                 \
     }                                                                                            \
-    \
-    BOOST_MOVE_TMPL_LT##N BOOST_MOVE_CLASS##N BOOST_MOVE_GT##N                                      \
-    iterator emplace(iterator position BOOST_MOVE_I##N BOOST_MOVE_UREF##N)                          \
+    //
+    #define BOOST_PP_LOCAL_LIMITS (0, BOOST_CONTAINER_MAX_CONSTRUCTOR_PARAMETERS)
+    #include BOOST_PP_LOCAL_ITERATE()
+
+    #define BOOST_PP_LOCAL_MACRO(n)                                                                 \
+    BOOST_PP_EXPR_IF(n, template<) BOOST_PP_ENUM_PARAMS(n, class P) BOOST_PP_EXPR_IF(n, >)          \
+    iterator emplace(iterator position BOOST_PP_ENUM_TRAILING(n, BOOST_CONTAINER_PP_PARAM_LIST, _)) \
     {                                                                                               \
         typedef typename vt::disable_trivial_init dti;                                              \
         namespace sv = varray_detail;                                                               \
@@ -1089,7 +1100,7 @@ public:
                                                                                                     \
         if ( position == this->end() )                                                              \
         {                                                                                           \
-            sv::construct(dti(), position BOOST_MOVE_I##N BOOST_MOVE_FWD##N );         /*may throw*/\
+            sv::construct(dti(), position BOOST_PP_ENUM_TRAILING(n, BOOST_CONTAINER_PP_PARAM_FORWARD, _) ); /*may throw*/\
             ++m_size; /*update end*/                                                                \
         }                                                                                           \
         else                                                                                        \
@@ -1098,24 +1109,24 @@ public:
             /* TODO - should move be used only if it's nonthrowing? */                              \
                                                                                                     \
             value_type & r = *(this->end() - 1);                                                    \
-            sv::construct(dti(), this->end(), boost::move(r));                         /*may throw*/\
+            sv::construct(dti(), this->end(), boost::move(r));                                /*may throw*/\
             ++m_size; /*update end*/                                                                \
             sv::move_backward(position, this->end() - 2, this->end() - 1);             /*may throw*/\
                                                                                                     \
             aligned_storage<sizeof(value_type), alignment_of<value_type>::value> temp_storage;      \
             value_type * val_p = static_cast<value_type *>(temp_storage.address());                 \
-            sv::construct(dti(), val_p BOOST_MOVE_I##N BOOST_MOVE_FWD##N );            /*may throw*/\
+            sv::construct(dti(), val_p BOOST_PP_ENUM_TRAILING(n, BOOST_CONTAINER_PP_PARAM_FORWARD, _) ); /*may throw*/\
             sv::scoped_destructor<value_type> d(val_p);                                             \
             sv::assign(position, ::boost::move(*val_p));                               /*may throw*/\
         }                                                                                           \
                                                                                                     \
         return position;                                                                            \
     }                                                                                               \
-    
-    BOOST_MOVE_ITERATE_0TO9(BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_EMPLACE)
-    #undef BOOST_GEOMETRY_INDEX_DETAIL_VARRAY_EMPLACE
+    //
+    #define BOOST_PP_LOCAL_LIMITS (0, BOOST_CONTAINER_MAX_CONSTRUCTOR_PARAMETERS)
+    #include BOOST_PP_LOCAL_ITERATE()
 
-#endif // !defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) || defined(BOOST_CONTAINER_DOXYGEN_INVOKED)
+#endif // BOOST_CONTAINER_PERFECT_FORWARDING || BOOST_CONTAINER_DOXYGEN_INVOKED
 #endif // !BOOST_CONTAINER_VARRAY_DISABLE_EMPLACE
 
     //! @brief Removes all elements from the container.
@@ -1400,7 +1411,7 @@ public:
     //!
     //! @par Complexity
     //!   Constant O(1).
-    const_reverse_iterator rbegin() const { return const_reverse_iterator(this->end()); }
+    const_reverse_iterator rbegin() const { return reverse_iterator(this->end()); }
 
     //! @brief Returns const reverse iterator to the first element of the reversed container.
     //!
@@ -1412,7 +1423,7 @@ public:
     //!
     //! @par Complexity
     //!   Constant O(1).
-    const_reverse_iterator crbegin() const { return const_reverse_iterator(this->end()); }
+    const_reverse_iterator crbegin() const { return reverse_iterator(this->end()); }
 
     //! @brief Returns reverse iterator to the one after the last element of the reversed container.
     //!
@@ -1436,7 +1447,7 @@ public:
     //!
     //! @par Complexity
     //!   Constant O(1).
-    const_reverse_iterator rend() const { return const_reverse_iterator(this->begin()); }
+    const_reverse_iterator rend() const { return reverse_iterator(this->begin()); }
 
     //! @brief Returns const reverse iterator to the one after the last element of the reversed container.
     //!
@@ -1448,7 +1459,7 @@ public:
     //!
     //! @par Complexity
     //!   Constant O(1).
-    const_reverse_iterator crend() const { return const_reverse_iterator(this->begin()); }
+    const_reverse_iterator crend() const { return reverse_iterator(this->begin()); }
 
     //! @brief Returns container's capacity.
     //!
@@ -1608,8 +1619,7 @@ private:
     //   Linear O(N).
     void swap_dispatch_impl(iterator first_sm, iterator last_sm, iterator first_la, iterator last_la, boost::true_type const& /*use_memop*/)
     {
-        //BOOST_GEOMETRY_INDEX_ASSERT(std::distance(first_sm, last_sm) <= std::distance(first_la, last_la),
-        //                            "incompatible ranges");
+        //BOOST_ASSERT_MSG(std::distance(first_sm, last_sm) <= std::distance(first_la, last_la));
 
         namespace sv = varray_detail;
         for (; first_sm != last_sm ; ++first_sm, ++first_la)
@@ -1634,8 +1644,7 @@ private:
     //   Linear O(N).
     void swap_dispatch_impl(iterator first_sm, iterator last_sm, iterator first_la, iterator last_la, boost::false_type const& /*use_memop*/)
     {
-        //BOOST_GEOMETRY_INDEX_ASSERT(std::distance(first_sm, last_sm) <= std::distance(first_la, last_la),
-        //                            "incompatible ranges");
+        //BOOST_ASSERT_MSG(std::distance(first_sm, last_sm) <= std::distance(first_la, last_la));
 
         namespace sv = varray_detail;
         for (; first_sm != last_sm ; ++first_sm, ++first_la)
@@ -1942,6 +1951,7 @@ public:
     void insert(iterator, Iterator first, Iterator last)
     {
         // TODO - add MPL_ASSERT, check if Iterator is really an iterator
+        typedef typename boost::iterator_traversal<Iterator>::type traversal;
         errh::check_capacity(*this, std::distance(first, last));                    // may throw
     }
 
@@ -1957,7 +1967,7 @@ public:
         errh::check_iterator_end_eq(*this, first);
         errh::check_iterator_end_eq(*this, last);
 
-        //BOOST_GEOMETRY_INDEX_ASSERT(0 <= n, "invalid range");
+        //BOOST_ASSERT_MSG(0 <= n, "invalid range");
     }
 
     // basic
@@ -1965,6 +1975,7 @@ public:
     void assign(Iterator first, Iterator last)
     {
         // TODO - add MPL_ASSERT, check if Iterator is really an iterator
+        typedef typename boost::iterator_traversal<Iterator>::type traversal;
         errh::check_capacity(*this, std::distance(first, last));                    // may throw
     }
 

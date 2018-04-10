@@ -10,11 +10,7 @@
 #ifndef BOOST_INTERPROCESS_WINDOWS_NAMED_MUTEX_HPP
 #define BOOST_INTERPROCESS_WINDOWS_NAMED_MUTEX_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -39,13 +35,13 @@ namespace ipcdetail {
 
 class windows_named_mutex
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
 
    //Non-copyable
    windows_named_mutex();
    windows_named_mutex(const windows_named_mutex &);
    windows_named_mutex &operator=(const windows_named_mutex &);
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
    windows_named_mutex(create_only_t, const char *name, const permissions &perm = permissions());
@@ -63,7 +59,7 @@ class windows_named_mutex
 
    static bool remove(const char *name);
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    friend class interprocess_tester;
    void dont_close_on_destruction();
@@ -110,7 +106,7 @@ class windows_named_mutex
       private:
       winapi_mutex_wrapper&     m_mtx_wrapper;
    };
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
 inline windows_named_mutex::~windows_named_mutex()

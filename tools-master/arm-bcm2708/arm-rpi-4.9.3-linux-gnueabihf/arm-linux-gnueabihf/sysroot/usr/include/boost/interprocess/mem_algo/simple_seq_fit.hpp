@@ -11,11 +11,7 @@
 #ifndef BOOST_INTERPROCESS_SIMPLE_SEQ_FIT_HPP
 #define BOOST_INTERPROCESS_SIMPLE_SEQ_FIT_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -38,9 +34,9 @@ template<class MutexFamily, class VoidPointer>
 class simple_seq_fit
    : public ipcdetail::simple_seq_fit_impl<MutexFamily, VoidPointer>
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    typedef ipcdetail::simple_seq_fit_impl<MutexFamily, VoidPointer> base_t;
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
    typedef typename base_t::size_type                            size_type;

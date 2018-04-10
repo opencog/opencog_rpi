@@ -1,5 +1,5 @@
 /*
- *          Copyright Andrey Semashev 2007 - 2015.
+ *          Copyright Andrey Semashev 2007 - 2013.
  * Distributed under the Boost Software License, Version 1.0.
  *    (See accompanying file LICENSE_1_0.txt or copy at
  *          http://www.boost.org/LICENSE_1_0.txt)
@@ -60,16 +60,9 @@ public:
     }
 
     //! Conversion operator (would be invoked in case of reading from the container)
-    BOOST_FORCEINLINE operator mapped_type() const BOOST_NOEXCEPT
-    {
-        return read_mapped_value();
-    }
+    operator mapped_type() const BOOST_NOEXCEPT;
     //! Assignment operator (would be invoked in case of writing to the container)
     mapped_type& operator= (mapped_type const& val) const;
-
-private:
-    //! Reads the referenced mapped value from the container
-    mapped_type read_mapped_value() const BOOST_NOEXCEPT;
 };
 
 } // namespace aux
@@ -292,7 +285,7 @@ public:
      */
     void swap(attribute_set& that) BOOST_NOEXCEPT
     {
-        implementation* const p = m_pImpl;
+        register implementation* const p = m_pImpl;
         m_pImpl = that.m_pImpl;
         that.m_pImpl = p;
     }
@@ -475,8 +468,8 @@ inline void swap(attribute_set& left, attribute_set& right) BOOST_NOEXCEPT
 
 namespace aux {
 
-//! Reads the referenced mapped value from the container
-inline attribute_set_reference_proxy::mapped_type attribute_set_reference_proxy::read_mapped_value() const BOOST_NOEXCEPT
+//! Conversion operator (would be invoked in case of reading from the container)
+inline attribute_set_reference_proxy::operator mapped_type() const BOOST_NOEXCEPT
 {
     attribute_set::iterator it = m_pContainer->find(m_key);
     if (it != m_pContainer->end())

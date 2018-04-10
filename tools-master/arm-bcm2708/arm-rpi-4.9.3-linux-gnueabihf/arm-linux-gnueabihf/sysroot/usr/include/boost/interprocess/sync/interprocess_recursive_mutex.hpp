@@ -27,13 +27,9 @@
 #ifndef BOOST_INTERPROCESS_RECURSIVE_MUTEX_HPP
 #define BOOST_INTERPROCESS_RECURSIVE_MUTEX_HPP
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
+#if (defined _MSC_VER) && (_MSC_VER >= 1200)
 #  pragma once
 #endif
 
@@ -68,7 +64,7 @@ class mutex_traits;
 
 #endif
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 //!\file
 //!Describes interprocess_recursive_mutex and shared_recursive_try_mutex classes
@@ -81,11 +77,11 @@ namespace interprocess {
 //!process. Allows timed lock tries
 class interprocess_recursive_mutex
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    //Non-copyable
    interprocess_recursive_mutex(const interprocess_recursive_mutex &);
    interprocess_recursive_mutex &operator=(const interprocess_recursive_mutex &);
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
    public:
    //!Constructor.
    //!Throws interprocess_exception on error.
@@ -120,7 +116,7 @@ class interprocess_recursive_mutex
    //!   same number of times it is locked.
    //!Throws: interprocess_exception on error.
    void unlock();
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
 
    #if defined (BOOST_INTERPROCESS_USE_GENERIC_EMULATION)
@@ -137,7 +133,7 @@ class interprocess_recursive_mutex
    #else
       #error "Unknown platform for interprocess_mutex"
    #endif
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
 }  //namespace interprocess {
@@ -154,7 +150,7 @@ inline void interprocess_recursive_mutex::lock()
 {
    #ifdef BOOST_INTERPROCESS_ENABLE_TIMEOUT_WHEN_LOCKING
       boost::posix_time::ptime wait_time
-         = microsec_clock::universal_time()
+         = boost::posix_time::microsec_clock::universal_time()
          + boost::posix_time::milliseconds(BOOST_INTERPROCESS_TIMEOUT_WHEN_LOCKING_DURATION_MS);
       if (!mutex.timed_lock(wait_time)){
          throw interprocess_exception(timeout_when_locking_error, "Interprocess mutex timeout when locking. Possible deadlock: owner died without unlocking?");

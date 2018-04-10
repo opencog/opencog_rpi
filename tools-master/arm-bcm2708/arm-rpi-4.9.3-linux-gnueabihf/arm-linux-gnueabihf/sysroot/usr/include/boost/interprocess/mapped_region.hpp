@@ -11,27 +11,17 @@
 #ifndef BOOST_INTERPROCESS_MAPPED_REGION_HPP
 #define BOOST_INTERPROCESS_MAPPED_REGION_HPP
 
-#ifndef BOOST_CONFIG_HPP
-#  include <boost/config.hpp>
-#endif
-#
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/interprocess/detail/config_begin.hpp>
 #include <boost/interprocess/detail/workaround.hpp>
 
 #include <boost/interprocess/interprocess_fwd.hpp>
 #include <boost/interprocess/exceptions.hpp>
-#include <boost/move/utility_core.hpp>
+#include <boost/move/move.hpp>
 #include <boost/interprocess/detail/utilities.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
 #include <string>
 #include <boost/cstdint.hpp>
 #include <boost/assert.hpp>
-#include <boost/move/adl_move_swap.hpp>
-
 //Some Unixes use caddr_t instead of void * in madvise
 //              SunOS                                 Tru64                               HP-UX                    AIX
 #if defined(sun) || defined(__sun) || defined(__osf__) || defined(__osf) || defined(_hpux) || defined(hpux) || defined(_AIX)
@@ -63,7 +53,7 @@
 #    error Unknown platform
 #  endif
 
-#endif   //#if defined (BOOST_INTERPROCESS_WINDOWS)
+#endif   //#if (defined BOOST_INTERPROCESS_WINDOWS)
 
 //!\file
 //!Describes mapped region class
@@ -71,7 +61,7 @@
 namespace boost {
 namespace interprocess {
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+/// @cond
 
 //Solaris declares madvise only in some configurations but defines MADV_XXX, a bit confusing.
 //Predeclare it here to avoid any compilation error
@@ -82,7 +72,7 @@ extern "C" int madvise(caddr_t, size_t, int);
 namespace ipcdetail{ class interprocess_tester; }
 namespace ipcdetail{ class raw_mapped_region_creator; }
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 //!The mapped_region class represents a portion or region created from a
 //!memory_mappable object.
@@ -92,10 +82,10 @@ namespace ipcdetail{ class raw_mapped_region_creator; }
 //!the region specified by the user.
 class mapped_region
 {
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    //Non-copyable
    BOOST_MOVABLE_BUT_NOT_COPYABLE(mapped_region)
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 
    public:
 
@@ -196,7 +186,7 @@ class mapped_region
 
    //!This enum specifies region usage behaviors that an application can specify
    //!to the mapped region implementation.
-   enum advice_types{
+   enum advice_types{ 
       //!Specifies that the application has no advice to give on its behavior with respect to
       //!the region. It is the default characteristic if no advice is given for a range of memory.
       advice_normal,
@@ -227,7 +217,7 @@ class mapped_region
    //!will restrict the address and the offset to map.
    static std::size_t get_page_size();
 
-   #if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+   /// @cond
    private:
    //!Closes a previously opened memory mapping. Never throws
    void priv_close();
@@ -264,10 +254,10 @@ class mapped_region
    template<int Dummy>
    static void destroy_syncs_in_range(const void *addr, std::size_t size);
    #endif
-   #endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+   /// @endcond
 };
 
-#if !defined(BOOST_INTERPROCESS_DOXYGEN_INVOKED)
+///@cond
 
 inline void swap(mapped_region &x, mapped_region &y)
 {  x.swap(y);  }
@@ -384,7 +374,7 @@ template<int dummy>
 inline std::size_t mapped_region::page_size_holder<dummy>::get_page_size()
 {
    winapi::system_info info;
-   winapi::get_system_info(&info);
+   get_system_info(&info);
    return std::size_t(info.dwAllocationGranularity);
 }
 
@@ -523,14 +513,14 @@ inline bool mapped_region::flush(std::size_t mapping_offset, std::size_t numbyte
 
 inline bool mapped_region::shrink_by(std::size_t bytes, bool from_back)
 {
-   void *shrink_page_start = 0;
-   std::size_t shrink_page_bytes = 0;
+   void *shrink_page_start;
+   std::size_t shrink_page_bytes;
    if(!this->priv_shrink_param_check(bytes, from_back, shrink_page_start, shrink_page_bytes)){
       return false;
    }
    else if(shrink_page_bytes){
       //In Windows, we can't decommit the storage or release the virtual address space,
-      //the best we can do is try to remove some memory from the process working set.
+      //the best we can do is try to remove some memory from the process working set. 
       //With a bit of luck we can free some physical memory.
       unsigned long old_protect_ignored;
       bool b_ret = winapi::virtual_unlock(shrink_page_start, shrink_page_bytes)
@@ -571,7 +561,7 @@ inline void mapped_region::priv_close()
 inline void mapped_region::dont_close_on_destruction()
 {}
 
-#else    //#if defined (BOOST_INTERPROCESS_WINDOWS)
+#else    //#if (defined BOOST_INTERPROCESS_WINDOWS)
 
 inline mapped_region::mapped_region()
    :  m_base(0), m_size(0), m_page_offset(0), m_mode(read_only), m_is_xsi(false)
@@ -751,9 +741,6 @@ inline bool mapped_region::advise(advice_types advice)
    const unsigned int mode_none = 0;
    const unsigned int mode_padv = 1;
    const unsigned int mode_madv = 2;
-   // Suppress "unused variable" warnings
-   (void)mode_padv;
-   (void)mode_madv;
    unsigned int mode = mode_none;
    //Choose advice either from POSIX (preferred) or native Unix
    switch(advice){
@@ -843,7 +830,7 @@ inline void mapped_region::priv_close()
 inline void mapped_region::dont_close_on_destruction()
 {  m_base = 0;   }
 
-#endif   //#if defined (BOOST_INTERPROCESS_WINDOWS)
+#endif   //##if (defined BOOST_INTERPROCESS_WINDOWS)
 
 template<int dummy>
 const std::size_t mapped_region::page_size_holder<dummy>::PageSize
@@ -859,14 +846,14 @@ inline std::size_t mapped_region::get_page_size()
 
 inline void mapped_region::swap(mapped_region &other)
 {
-   ::boost::adl_move_swap(this->m_base, other.m_base);
-   ::boost::adl_move_swap(this->m_size, other.m_size);
-   ::boost::adl_move_swap(this->m_page_offset, other.m_page_offset);
-   ::boost::adl_move_swap(this->m_mode,  other.m_mode);
-   #if defined (BOOST_INTERPROCESS_WINDOWS)
-   ::boost::adl_move_swap(this->m_file_or_mapping_hnd, other.m_file_or_mapping_hnd);
+   ipcdetail::do_swap(this->m_base, other.m_base);
+   ipcdetail::do_swap(this->m_size, other.m_size);
+   ipcdetail::do_swap(this->m_page_offset, other.m_page_offset);
+   ipcdetail::do_swap(this->m_mode,  other.m_mode);
+   #if (defined BOOST_INTERPROCESS_WINDOWS)
+   ipcdetail::do_swap(this->m_file_or_mapping_hnd, other.m_file_or_mapping_hnd);
    #else
-   ::boost::adl_move_swap(this->m_is_xsi, other.m_is_xsi);
+   ipcdetail::do_swap(this->m_is_xsi, other.m_is_xsi);
    #endif
 }
 
@@ -880,7 +867,7 @@ struct null_mapped_region_function
    {  return 0;  }
 };
 
-#endif   //#ifndef BOOST_INTERPROCESS_DOXYGEN_INVOKED
+/// @endcond
 
 }  //namespace interprocess {
 }  //namespace boost {

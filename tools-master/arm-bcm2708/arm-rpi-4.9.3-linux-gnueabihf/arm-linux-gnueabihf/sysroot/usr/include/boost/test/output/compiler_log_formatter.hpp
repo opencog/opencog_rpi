@@ -1,13 +1,13 @@
-//  (C) Copyright Gennadiy Rozental 2001.
+//  (C) Copyright Gennadiy Rozental 2005-2008.
 //  Distributed under the Boost Software License, Version 1.0.
-//  (See accompanying file LICENSE_1_0.txt or copy at
+//  (See accompanying file LICENSE_1_0.txt or copy at 
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org/libs/test for the library home page.
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision$
+//  Version     : $Revision: 57992 $
 //
 //  Description : contains compiler like Log formatter definition
 // ***************************************************************************
@@ -24,7 +24,9 @@
 //____________________________________________________________________________//
 
 namespace boost {
+
 namespace unit_test {
+
 namespace output {
 
 // ************************************************************************** //
@@ -33,8 +35,6 @@ namespace output {
 
 class BOOST_TEST_DECL compiler_log_formatter : public unit_test_log_formatter {
 public:
-    compiler_log_formatter() : m_color_output( false ) {}
-
     // Formatter interface
     void    log_start( std::ostream&, counter_t test_cases_amount );
     void    log_finish( std::ostream& );
@@ -42,30 +42,26 @@ public:
 
     void    test_unit_start( std::ostream&, test_unit const& tu );
     void    test_unit_finish( std::ostream&, test_unit const& tu, unsigned long elapsed );
-    void    test_unit_skipped( std::ostream&, test_unit const& tu, const_string reason );
+    void    test_unit_skipped( std::ostream&, test_unit const& tu );
 
-    void    log_exception_start( std::ostream&, log_checkpoint_data const&, execution_exception const& ex );
-    void    log_exception_finish( std::ostream& );
+    void    log_exception( std::ostream&, log_checkpoint_data const&, execution_exception const& ex );
 
     void    log_entry_start( std::ostream&, log_entry_data const&, log_entry_types let );
     void    log_entry_value( std::ostream&, const_string value );
     void    log_entry_value( std::ostream&, lazy_ostream const& value );
     void    log_entry_finish( std::ostream& );
 
-    void    entry_context_start( std::ostream&, log_level );
-    void    log_entry_context( std::ostream&, const_string );
-    void    entry_context_finish( std::ostream& );
-
 protected:
     virtual void    print_prefix( std::ostream&, const_string file, std::size_t line );
-
-    // Data members
-    bool    m_color_output;
 };
 
 } // namespace output
+
 } // namespace unit_test
+
 } // namespace boost
+
+//____________________________________________________________________________//
 
 #include <boost/test/detail/enable_warnings.hpp>
 

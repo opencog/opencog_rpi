@@ -40,10 +40,10 @@
                         BOOST_PP_CAT(A, N)                                      \
                       , 0                                                       \
                     >::type                                                     \
-                >::type::type &e                                                \
+                >::type::type &                                                 \
             )                                                                   \
             {                                                                   \
-                eval_catch_body(BOOST_PP_CAT(a, N), e, ctx);                    \
+                boost::phoenix::eval(proto::child_c<1>(BOOST_PP_CAT(a, N)), ctx);               \
             }                                                                   \
     /**/
 
