@@ -1,9 +1,15 @@
+## @file        arm_gnueabihf_toolchain.cmake
+## @licence     AGPL
+
+# cmake toolchain file for opencog cross compile to arm7l
+# to be used by https://github.com/opencog/ocpkg/blob/master/octool_rpi.sh
+
 SET(CMAKE_SYSTEM_NAME Linux)
 
-SET(CC_TC_DIR $ENV{HOME}/$ENV{CC_TC_DIR}/opencog_rpi_toolchain)
-SET(DEPS_DIR ${CC_TC_DIR}/tools-master/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf/sysroot)
+SET(CC_TC_DIR $ENV{CC_TC_DIR})
+SET(DEPS_DIR $ENV{CC_TC_LIBS_PATH_2})
 
-SET(INSTALLED_DEPS_DIR ${CC_TC_DIR}/opencog_rasp)
+SET(INSTALLED_DEPS_DIR $ENV{CC_TC_LIBS_PATH_1})
 SET(INSTALL_DIR ${INSTALLED_DEPS_DIR}/usr/local)
 
 SET(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
