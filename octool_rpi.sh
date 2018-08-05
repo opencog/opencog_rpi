@@ -418,9 +418,9 @@ if [ $INSTALL_DEPS ] ; then
 			sudo apt-get install -y $APT_ARGS libboost1.62-dev
 		else
 			#install boost 1.60
-			wget http://144.76.153.5/opencog/libboost-1.60-all-dev-1_armhf.deb
-			sudo dpkg -i libboost-1.60-all-dev-1_armhf.deb
-			rm libboost-1.60-all-dev-1_armhf.deb
+			wget http://144.76.153.5/opencog/libboost-1.55-all-dev-1_armhf.deb
+			sudo dpkg -i libboost-1.55-all-dev-1_armhf.deb
+			rm libboost-1.55-all-dev-1_armhf.deb
 		fi
 	#	install_bdwgc # install bdwgc from source
 	#	install_guile # install guile  from source
