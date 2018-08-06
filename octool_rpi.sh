@@ -338,16 +338,34 @@ install_relex () {
     unzip jwnl14-rc2.zip jwnl14-rc2/jwnl.jar
     sudo mv $VERBOSE  jwnl14-rc2/jwnl.jar /usr/local/share/java/
     sudo chmod $VERBOSE  0644 /usr/local/share/java/jwnl.jar
+
+    export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+    
+    #ANT_OPTS := -Dbuild.sysclasspath=only
+
+     # installing RelEx
+    git clone https://github.com/opencog/relex 
+    cd relex
+    if grep -q '^vagrant:' /etc/passwd; then
+        cd /home/vagrant/relex
+        sudo -u vagrant ant build
+    else
+     ant build
+    fi
+
+    sudo ant install
+
+
     
     #installing relex
-    wget https://github.com/Dagiopia/relex/archive/$RELEX_V.tar.gz
-    tar $VERBOSE -xf $RELEX_V.tar.gz 
-    cd relex-$RELEX_V
-    export CLASSPATH=/usr/local/share/java
-    ant build
-    sudo ant install
-    cd $HOME
-    rm $VERBOSE -rf /tmp/relex_temp_
+    #wget https://github.com/Dagiopia/relex/archive/$RELEX_V.tar.gz
+    #tar $VERBOSE -xf $RELEX_V.tar.gz 
+    #cd relex-$RELEX_V
+    #export CLASSPATH=/usr/local/share/java
+    #ant build
+    #sudo ant install
+    #cd $HOME
+    #rm $VERBOSE -rf /tmp/relex_temp_
 }
 
 install_bdwgc_deb () {
